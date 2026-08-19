@@ -12,7 +12,8 @@ public class MoveProtoType : MonoBehaviour
     private InputAction jumpAction;
 
     private float moveInput;
-    private bool jumpRequested;
+    private bool jumpRequested,isGround;
+
 
     private void Awake()
     {
@@ -40,11 +41,18 @@ public class MoveProtoType : MonoBehaviour
     {
         Move();
 
-        if (jumpRequested)
+        
+        //Debug.Log(jumpRequested + "and" + isGround);
+
+        if (jumpRequested && isGround)
         {
+            
             Jump();
-            jumpRequested = false;
+            isGround = false;
+            
+            
         }
+        jumpRequested = false;
     }
 
     private void OnMove(InputAction.CallbackContext context)
@@ -65,6 +73,7 @@ public class MoveProtoType : MonoBehaviour
     {
         // 入力イベントでは要求だけを記録する
         jumpRequested = true;
+        
     }
 
     private void Move()
@@ -84,5 +93,15 @@ public class MoveProtoType : MonoBehaviour
         Vector3 velocity = rb.linearVelocity;
         velocity.y = jumpPower;
         rb.linearVelocity = velocity;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            //Debug.Log(isGround);
+            isGround = true;
+        }
+        
     }
 }
