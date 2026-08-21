@@ -42,7 +42,7 @@ public class ItemSearcher : MonoBehaviour
             if(items != null)
             {
                 Debug.Log("これはアイテムにできるぞ！");
-                items.emphasisItems(true);
+                items.EmphasisItems(true);
             }
             
         }
@@ -55,7 +55,7 @@ public class ItemSearcher : MonoBehaviour
             Item items = obj.GetComponent<Item>();
             if(items != null)
             {
-                items.emphasisItems(false);
+                items.EmphasisItems(false);
             }
             
         }
