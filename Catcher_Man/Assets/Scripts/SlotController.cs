@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
-using System.Security.Cryptography.X509Certificates;
 
 public class SlotController : MonoBehaviour
 {
@@ -30,8 +29,8 @@ public class SlotController : MonoBehaviour
             {
                 sr = getItem.GetComponent<SpriteRenderer>();
                 SItem.sprite = sr.sprite;
-                //Destroy(getItem);
-                getItem.SetActive(false);
+                Destroy(getItem);
+                //getItem.SetActive(false);
                 Debug.Log(i+"番目に入れたぞ");
                 break;
             

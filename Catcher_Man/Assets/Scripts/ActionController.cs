@@ -47,7 +47,9 @@ public class ActionController : MonoBehaviour
                 {
                     if (getItems[i] == null)
                     {
-                        getItems[i] = gb;
+                        GameObject or = Instantiate(gb);
+                        or.SetActive(false);
+                        getItems[i] = or;
                         sc.RefreshUI(gb);
                         break;
                     }
