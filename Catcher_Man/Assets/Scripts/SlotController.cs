@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.Security.Cryptography.X509Certificates;
 
 public class SlotController : MonoBehaviour
 {
@@ -21,6 +22,7 @@ public class SlotController : MonoBehaviour
     }
     public void RefreshUI(GameObject getItem)
     {
+        int i = 0;
         foreach(Image sItem in slotItem)
         {
             Image SItem = sItem.GetComponent<Image>();
@@ -28,11 +30,18 @@ public class SlotController : MonoBehaviour
             {
                 sr = getItem.GetComponent<SpriteRenderer>();
                 SItem.sprite = sr.sprite;
+                //Destroy(getItem);
                 getItem.SetActive(false);
-                Debug.Log("変わったぞ！");
+                Debug.Log(i+"番目に入れたぞ");
                 break;
             
         }
+        i++;
     }
+    
+    }
+    public void DeleteUI(int r)
+    {
+        slotItem[r].sprite = null;
     }
 }
