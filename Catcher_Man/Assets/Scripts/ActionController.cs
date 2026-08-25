@@ -5,13 +5,16 @@ using System.Collections.Generic;
 
 public class ActionController : MonoBehaviour
 {
-    private InputAction catchAction,putAction,selectAction;
+    private InputAction catchAction,putAction,selectAction,throwAction;
     private GameObject gb;
     private bool isTouched = false;
     [SerializeField] private SlotController sc;
+    [SerializeField] private ItemSearcher ic;
     int selectNumber = 0;
+    [SerializeField]float shootSpeed = 5f;
 
     [SerializeField]private List<GameObject> getItems = new();
+    [SerializeField] private GameObject shootPoint;
 
     
     private void Awake()
@@ -19,6 +22,8 @@ public class ActionController : MonoBehaviour
         catchAction = InputSystem.actions.FindAction("Catch");
         putAction = InputSystem.actions.FindAction("Put");
         selectAction = InputSystem.actions.FindAction("Select");
+        throwAction = InputSystem.actions.FindAction("Throw");
+
         
     }
 
@@ -26,6 +31,7 @@ public class ActionController : MonoBehaviour
         catchAction.started += OnCatch;
         putAction.started += OnPut;
         selectAction.started += OnSelect;
+        throwAction.started += OnThrow;
         
     }
     private void OnDisable()
@@ -33,6 +39,7 @@ public class ActionController : MonoBehaviour
         catchAction.started -= OnCatch;
         putAction.started -= OnPut;
         selectAction.started -= OnSelect;
+        throwAction.started -= OnThrow;
     }
 
 
@@ -51,6 +58,7 @@ public class ActionController : MonoBehaviour
                         or.SetActive(false);
                         getItems[i] = or;
                         sc.RefreshUI(gb);
+                        ic.DeleteSearchedItem(gb);
                         break;
                     }
                 }
@@ -85,6 +93,22 @@ public class ActionController : MonoBehaviour
         Debug.Log(selectNumber+"を選択中");
         
     }
+    private void OnThrow(InputAction.CallbackContext context)
+    {
+        GameObject rgb = getItems[selectNumber];
+        rgb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
+        rgb.transform.rotation = this.transform.rotation* Quaternion.Euler(0f,180f,0f);
+        rgb.SetActive(true);
+        Item rg = rgb.GetComponent<Item>();
+        rg.GetComponent<Rigidbody>().constraints &= ~RigidbodyConstraints.FreezePositionY;
+        rg.GetComponent<Rigidbody>().constraints &= ~RigidbodyConstraints.FreezePositionZ;
+        rg.GetComponent<Rigidbody>().AddForce(-this.transform.right * shootSpeed, ForceMode.Impulse);
+        getItems[selectNumber]=null;
+        sc.DeleteUI(selectNumber);
+        
+        Destroy(rgb,5f);
+
+    }
     private void OnCollisionStay(Collision other) {
         if (other.gameObject.CompareTag("Item"))
         {
@@ -99,4 +123,5 @@ public class ActionController : MonoBehaviour
 
         }
     }
+    
 }
