@@ -50,8 +50,16 @@ public class ItemSearcher : MonoBehaviour
 
     private void OnSearchCanceled(InputAction.CallbackContext context)
     {
+        
         foreach(GameObject obj in aroundItems)
         {
+            if (obj == null)
+            {
+                continue;
+            }
+            
+
+
             Item items = obj.GetComponent<Item>();
             if(items != null)
             {
@@ -70,6 +78,11 @@ public class ItemSearcher : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         aroundItems.Remove(other.gameObject);
+    }
+
+    public void DeleteSearchedItem(GameObject item)
+    {
+        aroundItems.RemoveAll(obj => obj == null || obj == item);
     }
 
 
