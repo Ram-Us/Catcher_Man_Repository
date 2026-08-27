@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class ActionController : MonoBehaviour
 {
-    private InputAction catchAction,putAction,selectAction,throwAction;
+    private InputAction catchAction,putAction,selectAction,throwAction,swingAction;
     private GameObject gb;
     private bool isTouched = false;
     [SerializeField] private SlotController sc;
@@ -16,6 +16,8 @@ public class ActionController : MonoBehaviour
     [SerializeField]private List<GameObject> getItems = new();
     [SerializeField] private GameObject shootPoint;
 
+    private Animator animator;
+
     
     private void Awake()
     {
@@ -23,6 +25,8 @@ public class ActionController : MonoBehaviour
         putAction = InputSystem.actions.FindAction("Put");
         selectAction = InputSystem.actions.FindAction("Select");
         throwAction = InputSystem.actions.FindAction("Throw");
+        swingAction = InputSystem.actions.FindAction("Swing");
+        animator = GetComponent<Animator>();
 
         
     }
@@ -32,6 +36,7 @@ public class ActionController : MonoBehaviour
         putAction.started += OnPut;
         selectAction.started += OnSelect;
         throwAction.started += OnThrow;
+        swingAction.started += OnSwing;
         
     }
     private void OnDisable()
@@ -40,6 +45,7 @@ public class ActionController : MonoBehaviour
         putAction.started -= OnPut;
         selectAction.started -= OnSelect;
         throwAction.started -= OnThrow;
+        swingAction.started -= OnSwing;
     }
 
 
@@ -103,12 +109,20 @@ public class ActionController : MonoBehaviour
         rg.GetComponent<Rigidbody>().constraints &= ~RigidbodyConstraints.FreezePositionY;
         rg.GetComponent<Rigidbody>().constraints &= ~RigidbodyConstraints.FreezePositionZ;
         rg.GetComponent<Rigidbody>().AddForce(-this.transform.right * shootSpeed, ForceMode.Impulse);
+        
         getItems[selectNumber]=null;
         sc.DeleteUI(selectNumber);
         
         Destroy(rgb,5f);
 
     }
+    private void OnSwing(InputAction.CallbackContext context)
+    {
+        animator.SetTrigger("Weapon");
+        Debug.Log("武器を振った");
+    }
+    
+
     private void OnCollisionStay(Collision other) {
         if (other.gameObject.CompareTag("Item"))
         {

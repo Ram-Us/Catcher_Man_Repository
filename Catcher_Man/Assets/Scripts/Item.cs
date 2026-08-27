@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Item : MonoBehaviour
@@ -16,10 +17,11 @@ public class Item : MonoBehaviour
         frame.SetActive(sw);
         
     }
-    private void OnTriggerEnter(Collider other)
+    private void OnCollisionEnter(Collision collision)
     {
-        if(other.CompareTag("Item"))
+        if(collision.gameObject.CompareTag("Item"))
         {
+            Debug.Log("アイテムに触れた");
             Destroy(this.gameObject);
         }
         
