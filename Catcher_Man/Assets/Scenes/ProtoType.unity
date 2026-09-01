@@ -952,6 +952,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   shootPoint: {fileID: 1397782252}
+  weapon: {fileID: 1937409917}
 --- !u!95 &839407653
 Animator:
   serializedVersion: 7
@@ -2200,7 +2201,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1937409918
 Transform:
   m_ObjectHideFlags: 0

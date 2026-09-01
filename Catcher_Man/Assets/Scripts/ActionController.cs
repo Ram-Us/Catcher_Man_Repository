@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 
 public class ActionController : MonoBehaviour
@@ -14,9 +15,10 @@ public class ActionController : MonoBehaviour
     [SerializeField]float shootSpeed = 5f;
 
     [SerializeField]private List<GameObject> getItems = new();
-    [SerializeField] private GameObject shootPoint;
-
+    [SerializeField] private GameObject shootPoint,weapon;
+    GameObject childWeapon;
     private Animator animator;
+    SpriteRenderer srWeapon,srPresent;
 
     
     private void Awake()
@@ -27,6 +29,7 @@ public class ActionController : MonoBehaviour
         throwAction = InputSystem.actions.FindAction("Throw");
         swingAction = InputSystem.actions.FindAction("Swing");
         animator = GetComponent<Animator>();
+        childWeapon = weapon.transform.GetChild(0).gameObject;
 
         
     }
@@ -65,6 +68,7 @@ public class ActionController : MonoBehaviour
                         getItems[i] = or;
                         sc.RefreshUI(gb);
                         ic.DeleteSearchedItem(gb);
+                        WeaponSwap();
                         break;
                     }
                 }
@@ -78,6 +82,7 @@ public class ActionController : MonoBehaviour
     }
     private void OnPut(InputAction.CallbackContext context)
     {
+        weapon.SetActive(false);
         GameObject rGb = getItems[selectNumber];
         rGb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
         rGb.transform.rotation = this.transform.rotation * Quaternion.Euler(0f,180f,0f);
@@ -96,11 +101,13 @@ public class ActionController : MonoBehaviour
         {
             selectNumber++;
         }
+        WeaponSwap();
         Debug.Log(selectNumber+"を選択中");
         
     }
     private void OnThrow(InputAction.CallbackContext context)
     {
+        weapon.SetActive(false);
         GameObject rgb = getItems[selectNumber];
         rgb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
         rgb.transform.rotation = this.transform.rotation* Quaternion.Euler(0f,180f,0f);
@@ -118,8 +125,18 @@ public class ActionController : MonoBehaviour
     }
     private void OnSwing(InputAction.CallbackContext context)
     {
-        animator.SetTrigger("Weapon");
-        Debug.Log("武器を振った");
+        if(!(weapon.activeSelf))
+        {
+            WeaponSwap();
+            Debug.Log("武器を出した");
+        }
+        else
+        {
+            animator.SetTrigger("Weapon");
+            Debug.Log("武器をしまった");
+        }
+        
+        
     }
     
 
@@ -136,6 +153,22 @@ public class ActionController : MonoBehaviour
             isTouched = false;
 
         }
+    }
+    private void WeaponSwap()
+    {
+        if (getItems[selectNumber] == null)
+        {
+            weapon.SetActive(false);
+            Debug.Log("アイテムはなかったよ");
+        }
+        else
+        {
+            srWeapon = childWeapon.GetComponent<SpriteRenderer>();
+            srPresent = getItems[selectNumber].GetComponent<SpriteRenderer>();
+            srWeapon.sprite = srPresent.sprite;
+            weapon.SetActive(true);
+        }
+        
     }
     
 }
