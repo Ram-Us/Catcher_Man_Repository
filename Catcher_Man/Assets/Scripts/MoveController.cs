@@ -48,6 +48,7 @@ public class MoveController : MonoBehaviour
         {
             
             Jump();
+            Debug.Log("ホップステップジャンプ！");
             isGround = false;
             
             
