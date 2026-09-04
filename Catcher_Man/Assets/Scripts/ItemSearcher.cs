@@ -38,7 +38,7 @@ public class ItemSearcher : MonoBehaviour
         Debug.Log("Qが押されたぞ");
         foreach(GameObject obj in aroundItems)
         {
-            Item items = obj.GetComponent<Item>();
+            ItemGimmick items = obj.GetComponent<ItemGimmick>();
             if(items != null)
             {
                 Debug.Log("これはアイテムにできるぞ！");
@@ -60,7 +60,7 @@ public class ItemSearcher : MonoBehaviour
             
 
 
-            Item items = obj.GetComponent<Item>();
+            ItemGimmick items = obj.GetComponent<ItemGimmick>();
             if(items != null)
             {
                 items.EmphasisItems(false);
