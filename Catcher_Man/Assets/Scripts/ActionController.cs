@@ -112,7 +112,7 @@ public class ActionController : MonoBehaviour
         rgb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
         rgb.transform.rotation = this.transform.rotation* Quaternion.Euler(0f,180f,0f);
         rgb.SetActive(true);
-        Item rg = rgb.GetComponent<Item>();
+        ItemGimmick rg = rgb.GetComponent<ItemGimmick>();
         rg.GetComponent<Rigidbody>().constraints &= ~RigidbodyConstraints.FreezePositionY;
         rg.GetComponent<Rigidbody>().constraints &= ~RigidbodyConstraints.FreezePositionZ;
         rg.GetComponent<Rigidbody>().AddForce(-this.transform.right * shootSpeed, ForceMode.Impulse);
