@@ -12,6 +12,7 @@ public class ItemGimmick : MonoBehaviour {
     private SpriteRenderer sr,dsr,fsr;
     [SerializeField] private ItemDataBase db;
     [SerializeField] int id;
+    public int Id => id;
 
     void Awake()
     {
