@@ -72,7 +72,19 @@ public class ActionController : MonoBehaviour
                         break;
                     }
                 }
-                
+
+            }
+            else
+            {
+                for(int i = 0; i<getItems.Count; i++)
+                {
+                    if (gb.GetComponent<ItemGimmick>().Id == getItems[i].GetComponent<ItemGimmick>().Id)
+                    {
+                        sc.SetStock(i);
+                        Debug.Log("だぶり！！！！");
+                        break;
+                    }
+                }
             }
             /*else
             {
@@ -102,6 +114,7 @@ public class ActionController : MonoBehaviour
             selectNumber++;
         }
         WeaponSwap();
+        sc.MoveFrame(selectNumber);
         Debug.Log(selectNumber+"を選択中");
         
     }

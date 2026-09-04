@@ -1,17 +1,22 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
-
+using TMPro;
 public class SlotController : MonoBehaviour
 {
     [SerializeField] private List<Image> slotItem = new ();
-    SpriteRenderer sr;
+    private int[] stockCount={0,0,0,0};
+
+    [SerializeField] private Sprite baseSprite;
+    private SpriteRenderer sr;
+
+    [SerializeField] private Image frameImage;
+     private TextMeshProUGUI stock;
 
     
-
     public bool TryAdd(){
         foreach (Image sItem in slotItem){
-            if (sItem.sprite == null){
+            if (sItem.sprite == baseSprite){
                 Debug.Log("空きが見つかったのでtrueだぞ");
                 return true;
                 }
@@ -25,7 +30,7 @@ public class SlotController : MonoBehaviour
         foreach(Image sItem in slotItem)
         {
             Image SItem = sItem.GetComponent<Image>();
-            if(SItem.sprite == null)
+            if(SItem.sprite == baseSprite)
             {
                 sr = getItem.GetComponent<SpriteRenderer>();
                 SItem.sprite = sr.sprite;
@@ -41,6 +46,16 @@ public class SlotController : MonoBehaviour
     }
     public void DeleteUI(int r)
     {
-        slotItem[r].sprite = null;
+        slotItem[r].sprite = baseSprite;
+    }
+    public void MoveFrame(int n)
+    {
+        frameImage.rectTransform.position = slotItem[n].rectTransform.position + new Vector3(0f,0f,-0.2f);
+    }
+    public void SetStock(int n)
+    {
+        stockCount[n]++;
+        stock = slotItem[n].GetComponentInChildren<TextMeshProUGUI>();
+        stock.SetText(stockCount[n].ToString());
     }
 }
