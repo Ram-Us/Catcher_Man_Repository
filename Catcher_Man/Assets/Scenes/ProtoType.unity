@@ -496,6 +496,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ItemSlot1
       objectReference: {fileID: 0}
+    - target: {fileID: 8974867854425324024, guid: f42feb5063f8b4945b610446525e795b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -910,13 +914,10 @@ MonoBehaviour:
   sc: {fileID: 1981464137}
   ic: {fileID: 412097156}
   shootSpeed: 5
-  getItems:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  getItems: 00000000000000000000000000000000
   shootPoint: {fileID: 1397782252}
   weapon: {fileID: 1937409917}
+  dataBase: {fileID: 11400000, guid: fcf926e7cc7a18146a7ed4d5305dd745, type: 2}
 --- !u!95 &839407653
 Animator:
   serializedVersion: 7
@@ -950,6 +951,10 @@ PrefabInstance:
     - target: {fileID: 3696910717554907401, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
       propertyPath: id
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3713447989443836316, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3713447989443836316, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1568,7 +1573,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3696910717554907401, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
       propertyPath: id
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3713447989443836316, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1610,9 +1615,41 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4237256763513532243, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+      propertyPath: m_ImplicitCom
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4237256763513532243, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+      propertyPath: m_IsKinematic
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4237256763513532243, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+      propertyPath: m_ImplicitTensor
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
       propertyPath: m_Name
       value: TestItem (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5203995104612446651, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+      propertyPath: m_Size.x
+      value: 0.36
+      objectReference: {fileID: 0}
+    - target: {fileID: 5203995104612446651, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+      propertyPath: m_Size.y
+      value: 1.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 5203995104612446651, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+      propertyPath: m_Size.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5203995104612446651, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+      propertyPath: m_Center.y
+      value: 0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 5203995104612446651, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+      propertyPath: m_Center.z
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 7688804219059676643, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
       propertyPath: db
@@ -1651,7 +1688,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.045, y: 0.0379, z: 0.0177}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1937409918}
@@ -1955,7 +1992,7 @@ Transform:
   m_GameObject: {fileID: 1937409917}
   serializedVersion: 2
   m_LocalRotation: {x: 0.06601145, y: 0.11824946, z: 0.3590839, w: 0.9234275}
-  m_LocalPosition: {x: -0.074, y: 0.04034798, z: -0.002}
+  m_LocalPosition: {x: -0.074, y: 0.0005, z: -0.002}
   m_LocalScale: {x: 0.32, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2088,6 +2125,7 @@ MonoBehaviour:
   - {fileID: 1185527610}
   baseSprite: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
   frameImage: {fileID: 1434217590}
+  dataBase: {fileID: 11400000, guid: fcf926e7cc7a18146a7ed4d5305dd745, type: 2}
 --- !u!1 &2117805824
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,6 +13,7 @@ public class SlotController : MonoBehaviour
     [SerializeField] private Image frameImage;
      private TextMeshProUGUI stock;
 
+    [SerializeField] private ItemDataBase dataBase;
     
     public bool TryAdd(){
         foreach (Image sItem in slotItem){
