@@ -14,30 +14,57 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   items:
   - id: 1
-    icon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+    icon: {fileID: 21300000, guid: 7810966f0f690954c87305933cabf2b0, type: 3}
     itemType: 0
-    itemName: "\u30DC\u30FC\u30EB"
-    cost: 2
-    speed: 5
+    itemName: "\u6728\u7BB1"
+    cost: 1
+    speed: 3
     attack: 1
+    colliderSize: {x: 1.4, y: 1.4, z: 2}
+    colliderCenterSize: {x: 0, y: 0, z: 0}
+    instance: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+    rotated: 0
   - id: 2
-    icon: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
+    icon: {fileID: 21300102, guid: 7810966f0f690954c87305933cabf2b0, type: 3}
     itemType: 0
-    itemName: "\u30DC\u30FC\u30EB"
-    cost: 2
+    itemName: "\u96D1\u8349"
+    cost: 1
     speed: 5
-    attack: 1
+    attack: 0
+    colliderSize: {x: 0.7, y: 0.3, z: 0.2}
+    colliderCenterSize: {x: 0.015, y: 0.14, z: 0}
+    instance: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+    rotated: 0
   - id: 3
-    icon: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
+    icon: {fileID: 21300136, guid: 7810966f0f690954c87305933cabf2b0, type: 3}
     itemType: 0
-    itemName: "\u30DC\u30FC\u30EB"
+    itemName: "\u77F3"
     cost: 2
     speed: 5
     attack: 1
+    colliderSize: {x: 1.5, y: 0.9, z: 1}
+    colliderCenterSize: {x: 0, y: 0.3, z: 0}
+    instance: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+    rotated: 0
   - id: 4
-    icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+    icon: {fileID: 21300260, guid: 7810966f0f690954c87305933cabf2b0, type: 3}
     itemType: 0
-    itemName: "\u30DC\u30FC\u30EB"
-    cost: 2
+    itemName: "\u9244\u7403"
+    cost: 3
     speed: 5
+    attack: 5
+    colliderSize: {x: 0.8, y: 0.8, z: 0.8}
+    colliderCenterSize: {x: 0, y: 0, z: 0}
+    instance: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+    rotated: 0
+  - id: 5
+    icon: {fileID: 21300028, guid: 7810966f0f690954c87305933cabf2b0, type: 3}
+    itemType: 2
+    itemName: "\u6728\u306E\u68D2"
+    cost: 2
+    speed: 8
     attack: 1
+    colliderSize: {x: 0.36, y: 1.05, z: 1}
+    colliderCenterSize: {x: 0, y: 0.55, z: 0.3}
+    instance: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+    rotated: 0

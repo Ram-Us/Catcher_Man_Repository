@@ -5,20 +5,41 @@ using UnityEngine;
 // アイテムの種類を表す列挙型
 public enum ItemType
 {
-    Ball,   // ボール
-    Heal    // 回復
+    Object,   // ボール
+    Enemy,    // 回復
+
+    Bullet
 }
 
 [System.Serializable]
 public class Item
 {
-    public int id;             // アイテムのID
-    public Sprite icon;        // アイテムのアイコン画像
-    public ItemType itemType;  // アイテムの種類
-    public string itemName;    // アイテムの名前
-    public int cost;    // 効果値
-    public float speed; //投げ時のスピード
-    public int attack; //振り時のダメージ量
+    [SerializeField] private int id;             // アイテムのID
+    public int Id => id;
+
+    [SerializeField] private Sprite icon;        // アイテムのアイコン画像
+    public Sprite Icon => icon;
+    [SerializeField] private ItemType itemType;  // アイテムの種類
+    public ItemType ItemType => itemType;
+    [SerializeField] private string itemName;    // アイテムの名前
+    public string ItemName => itemName;
+    [SerializeField] private int cost;    // 効果値
+    public int Cost => cost;
+    [SerializeField] private float speed; //投げ時のスピード
+    public float Speed => speed;
+    [SerializeField] private int attack; //振り時のダメージ量
+    public int Attack => attack;
+
+    [SerializeField] private Vector3 colliderSize; //オブジェクトのコライダーのサイズ
+    public Vector3 ColliderSize => colliderSize;
+    [SerializeField] private Vector3 colliderCenterSize; //オブジェクトのコライダーのサイズ
+    public Vector3 ColliderCenterSize => colliderCenterSize;
+
+    [SerializeField] private GameObject instance;  //取得したアイテムのインスタンス
+
+    [SerializeField] private bool rotated = true;
+    public bool Rotated => rotated;
+    public GameObject Instance => instance;
 
      
 
@@ -35,14 +56,103 @@ public class ItemDataBase : ScriptableObject
     {
         foreach (var item in items)
         {
-            if (item.id == id)
+            if (item.Id == id)
             {
                 return item;
             }
         }
-        Debug.LogWarning($"Item with ID {id} not found.");
         return null;
     }
 
+    public GameObject GetIntanceById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.Instance;
+            }
+        }
+        return null;
+    }
+    public Sprite GetSpriteById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.Icon;
+            }
+        }
+        return null;
+    }
+    public int GetCostById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.Cost;
+            }
+        }
+        
+        return 0;
+    }
+    public ItemType GetItemTypeById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.ItemType;
+            }
+        }
+        
+        return 0;
+    }
+    public string GetItemNameById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.ItemName;
+            }
+        }
+        
+        return null;
+    }
+    public float GetSpeedById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.Speed;
+            }
+        }
+        
+        return 0f;
+    }
+    public int GetAttackById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.Attack;
+            }
+        }
+        
+        return 0;
+    }
+    
+    public int GetId(GameObject gameObject)
+    {
+        ItemGimmick itemData = gameObject.GetComponent<ItemGimmick>();
+        return itemData.Id;
+    }
+
+    
 }
 
