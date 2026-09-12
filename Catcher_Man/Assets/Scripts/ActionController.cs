@@ -58,22 +58,21 @@ public class ActionController : MonoBehaviour
         {   //Debug.Log("タッチ");
             id = dataBase.GetId(gb);
             Debug.Log(id+"を取得");
-            if (sc.TryAdd())
+            if (sc.TryAdd())//空きがある状態での同アイテムに加算、もしくは空いた枠にアイテムを格納
             {
                 //Debug.Log("獲得！");
                 for(int i = 0; i < getItems.Count; i++)
                 {
                     if (getItems[i] == id)
                     {
-                        sc.SetStock(i);
-                        Debug.Log("だぶり！！！！");
+                        SetItem(gb,i,true);
+                        Debug.Log("同じアイテムが入ってるので足したぞ！");
                         break;
                     }else if (getItems[i] == 0)
                     {
                         getItems[i] = id;
-                        sc.RefreshUI(gb);
-                        ic.DeleteSearchedItem(gb);
-                        WeaponSwap();
+                        SetItem(gb,i,false);
+                        Debug.Log("空き枠に新しいアイテムを入れたぞ！");
                         break;
                     }
                 }
@@ -85,8 +84,8 @@ public class ActionController : MonoBehaviour
                 {
                     if (getItems[i] == id)
                     {
-                        sc.SetStock(i);
-                        Debug.Log("だぶり！！！！");
+                        SetItem(gb,i,true);
+                        Debug.Log("アイテムは満帆だけど、同じアイテムがあったので足したぞ！");
                         break;
                     }
                 }
@@ -113,8 +112,12 @@ public class ActionController : MonoBehaviour
         rGb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
         rGb.transform.rotation = this.transform.rotation * Quaternion.Euler(0f,180f,0f);
         rGb.SetActive(true);
-        getItems[selectNumber]=0;
-        sc.DeleteUI(selectNumber);
+        if (sc.StockCount[selectNumber] <= 1)
+        {
+            sc.DeleteUI(selectNumber);
+            getItems[selectNumber]=0;
+        }
+        sc.SubStock(selectNumber);
         Debug.Log(selectNumber+"番目のオブジェクトを設置！");
     }
     private void OnSelect(InputAction.CallbackContext context)
@@ -157,8 +160,16 @@ public class ActionController : MonoBehaviour
         }
         rg.GetComponent<Rigidbody>().AddForce(-this.transform.right * shootSpeed, ForceMode.Impulse);
         
-        getItems[selectNumber]=0;
-        sc.DeleteUI(selectNumber);
+        
+        
+        if (sc.StockCount[selectNumber] <= 1)
+        {
+            sc.DeleteUI(selectNumber);
+            getItems[selectNumber]=0;
+        }
+        sc.SubStock(selectNumber);
+        
+        
         
         //Destroy(rgb,5f);
 
@@ -208,6 +219,20 @@ public class ActionController : MonoBehaviour
             PresentWeaponVisual.sprite = choicedWeaponVisual;
             weapon.SetActive(true);
         }
+        
+    }
+    private void SetItem(GameObject gb,int i,bool isexisted)
+    {
+        if (!isexisted)
+        {
+            sc.RefreshUI(gb);
+
+        }
+        ic.DeleteSearchedItem(gb);
+        Destroy(gb);
+        WeaponSwap();
+        sc.AddStock(i);
+        
         
     }
     
