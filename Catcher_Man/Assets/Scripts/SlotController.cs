@@ -6,7 +6,7 @@ public class SlotController : MonoBehaviour
 {
     [SerializeField] private List<Image> slotItem = new ();
     private int[] stockCount={0,0,0,0};
-
+    public int[] StockCount => stockCount;
     [SerializeField] private Sprite baseSprite;
     private SpriteRenderer sr;
 
@@ -35,7 +35,6 @@ public class SlotController : MonoBehaviour
             {
                 sr = getItem.GetComponent<SpriteRenderer>();
                 SItem.sprite = sr.sprite;
-                Destroy(getItem);
                 //getItem.SetActive(false);
                 Debug.Log(i+"番目に入れたぞ");
                 break;
@@ -53,10 +52,26 @@ public class SlotController : MonoBehaviour
     {
         frameImage.rectTransform.position = slotItem[n].rectTransform.position + new Vector3(0f,0f,-0.2f);
     }
-    public void SetStock(int n)
+    public void AddStock(int n)
     {
         stockCount[n]++;
         stock = slotItem[n].GetComponentInChildren<TextMeshProUGUI>();
         stock.SetText(stockCount[n].ToString());
+    }
+    public void SubStock(int n)
+    {
+        if (stockCount[n] > 0)
+        {
+            stockCount[n]--;
+            stock = slotItem[n].GetComponentInChildren<TextMeshProUGUI>();
+            stock.SetText(stockCount[n].ToString());
+        }
+        else
+        {
+            stockCount[n]=0;
+        }
+        Debug.Log(n+"番目のitemの個数は"+StockCount[n]);
+        
+        
     }
 }
