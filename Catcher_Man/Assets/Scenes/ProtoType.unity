@@ -321,7 +321,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3713447989443836316, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.051
+      value: -0.365
       objectReference: {fileID: 0}
     - target: {fileID: 3713447989443836316, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
       propertyPath: m_LocalPosition.y
@@ -878,6 +878,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   jumpPower: 6
+  climbSpeed: 3
+  db: {fileID: 11400000, guid: fcf926e7cc7a18146a7ed4d5305dd745, type: 2}
 --- !u!65 &839407651
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -897,7 +899,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.15, y: 0.16, z: 0.15}
+  m_Size: {x: 0.15, y: 0.16, z: 0.1}
   m_Center: {x: 0, y: 0.01, z: 0}
 --- !u!114 &839407652
 MonoBehaviour:

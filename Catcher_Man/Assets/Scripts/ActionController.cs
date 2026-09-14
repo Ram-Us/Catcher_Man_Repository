@@ -10,7 +10,8 @@ public class ActionController : MonoBehaviour
     private bool isTouched = false;
     [SerializeField] private SlotController sc;
     [SerializeField] private ItemSearcher ic;
-    int selectNumber,id = 0;
+    private int selectNumber,id = 0;
+    public int SelectNumber => selectNumber;
     [SerializeField]float shootSpeed = 5f;
 
     [SerializeField]private List<int> getItems = new();

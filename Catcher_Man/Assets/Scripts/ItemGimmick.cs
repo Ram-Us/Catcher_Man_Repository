@@ -109,9 +109,19 @@ public class ItemGimmick : MonoBehaviour {
         }
         if(collision.gameObject.CompareTag("Ground"))
         {
-            GetComponent<Rigidbody>().constraints |= RigidbodyConstraints.FreezePositionY;
+            Rigidbody rb = GetComponent<Rigidbody>();
+            rb.constraints |= RigidbodyConstraints.FreezePositionY;
+            rb.isKinematic = true;
         }
         
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        if(!collision.gameObject.CompareTag("Ground"))
+        {
+            Rigidbody rb = GetComponent<Rigidbody>();
+            rb.isKinematic = false;
+        }
     }
     /*public void Initialized(GameObject instance, int id)
     {
