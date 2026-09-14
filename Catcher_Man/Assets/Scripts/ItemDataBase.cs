@@ -8,7 +8,8 @@ public enum ItemType
     Object,   // ボール
     Enemy,    // 回復
 
-    Bullet
+    Bullet,   //弾
+    Ladder    //はしご
 }
 
 [System.Serializable]

@@ -6,14 +6,15 @@ public class MoveController : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpPower = 7f;
+    [SerializeField] private float climbSpeed = 1f;
 
     private Rigidbody rb;
     private InputAction moveAction;
     private InputAction jumpAction;
 
     private float moveInput;
-    private bool jumpRequested,isGround;
-
+    private bool jumpRequested, isGround, isTouchedItem, isTouchingLadder, climbRequested;
+    [SerializeField] private ItemDataBase db;
 
     private void Awake()
     {
@@ -28,6 +29,8 @@ public class MoveController : MonoBehaviour
         moveAction.performed += OnMove;
         moveAction.canceled += OnMoveCanceled;
         jumpAction.started += OnJump;
+        jumpAction.performed += OnUp;
+        jumpAction.canceled += OnJumpCanceled;
     }
 
     private void OnDisable()
@@ -35,25 +38,37 @@ public class MoveController : MonoBehaviour
         moveAction.performed -= OnMove;
         moveAction.canceled -= OnMoveCanceled;
         jumpAction.started -= OnJump;
+        jumpAction.performed -= OnUp;
+        jumpAction.canceled -= OnJumpCanceled;
     }
 
     private void FixedUpdate()
     {
+        
         Move();
+        
+        
 
         
         //Debug.Log(jumpRequested + "and" + isGround);
 
         if (jumpRequested && isGround)
         {
-            
-            Jump();
-            Debug.Log("ホップステップジャンプ！");
+            if (!isTouchingLadder)
+            {
+                Jump();
+                Debug.Log("ホップステップジャンプ！");
+            }
             isGround = false;
-            
-            
         }
         jumpRequested = false;
+
+        if (isTouchingLadder && climbRequested)
+        {
+            Vector3 velocity = rb.linearVelocity;
+            velocity.y = climbSpeed;
+            rb.linearVelocity = velocity;
+        }
     }
 
     private void OnMove(InputAction.CallbackContext context)
@@ -72,8 +87,22 @@ public class MoveController : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext context)
     {
-        // 入力イベントでは要求だけを記録する
-        jumpRequested = true;
+        if (isTouchingLadder)
+        {
+            climbRequested = true;
+        }
+        else
+        {
+            jumpRequested = true;
+        }
+    }
+
+    private void OnJumpCanceled(InputAction.CallbackContext context)
+    {
+        climbRequested = false;
+    }
+    private void OnUp(InputAction.CallbackContext context)
+    {
         
     }
 
@@ -102,6 +131,32 @@ public class MoveController : MonoBehaviour
         {
             //Debug.Log(isGround);
             isGround = true;
+        } 
+
+         
+    }
+
+    private void OnCollisionStay(Collision collision) {
+        ItemGimmick item = collision.gameObject.GetComponentInParent<ItemGimmick>();
+
+        if (item != null &&
+            db.GetItemTypeById(item.Id) == ItemType.Ladder)
+        {
+            isTouchingLadder = true;
+        }
+    }
+    
+    
+    private void OnCollisionExit(Collision collision)
+    {
+        
+        ItemGimmick item = collision.gameObject.GetComponentInParent<ItemGimmick>();
+
+        if (item != null &&
+            db.GetItemTypeById(item.Id) == ItemType.Ladder)
+        {
+            isTouchingLadder = false;
+            climbRequested = false;
         }
         
     }
