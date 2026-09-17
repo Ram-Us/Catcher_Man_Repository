@@ -13,7 +13,7 @@ public class MoveController : MonoBehaviour
     private InputAction jumpAction;
 
     private float moveInput;
-    private bool jumpRequested, isGround, isTouchedItem, isTouchingLadder, climbRequested;
+    private bool jumpRequested, isGround,isItem, isTouchedItem, isTouchingLadder, climbRequested;
     [SerializeField] private ItemDataBase db;
 
     private void Awake()
@@ -52,16 +52,24 @@ public class MoveController : MonoBehaviour
         
         //Debug.Log(jumpRequested + "and" + isGround);
 
-        if (jumpRequested && isGround)
+        if ((jumpRequested && isGround)||(jumpRequested && isItem))
         {
             if (!isTouchingLadder)
             {
                 Jump();
                 Debug.Log("ホップステップジャンプ！");
             }
-            isGround = false;
+            if (isGround)
+            {
+                isGround = false;
+            }else if (isItem)
+            {
+                isItem = false;
+            }
+            
+            jumpRequested = false;
         }
-        jumpRequested = false;
+        
 
         if (isTouchingLadder && climbRequested)
         {
@@ -127,17 +135,17 @@ public class MoveController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Item"))
+        if (collision.gameObject.CompareTag("Ground"))
         {
             //Debug.Log(isGround);
             isGround = true;
-        } 
+        }
+        if (collision.gameObject.CompareTag("Item"))
+        {
+            isItem = true;
+        }
 
-         
-    }
-
-    private void OnCollisionStay(Collision collision) {
-        ItemGimmick item = collision.gameObject.GetComponentInParent<ItemGimmick>();
+         ItemGimmick item = collision.gameObject.GetComponentInParent<ItemGimmick>();
 
         if (item != null &&
             db.GetItemTypeById(item.Id) == ItemType.Ladder)
@@ -145,6 +153,7 @@ public class MoveController : MonoBehaviour
             isTouchingLadder = true;
         }
     }
+
     
     
     private void OnCollisionExit(Collision collision)

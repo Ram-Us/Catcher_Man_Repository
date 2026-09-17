@@ -16,8 +16,9 @@ public class ActionController : MonoBehaviour
 
     [SerializeField]private List<int> getItems = new();
     [SerializeField] private GameObject shootPoint,weapon;
-    GameObject childWeapon;
-    private Animator animator;
+    private GameObject weaponObject;
+    private Animator weaponAnimator;
+    private Animator playerAnimator;
     SpriteRenderer PresentWeaponVisual;
     Sprite choicedWeaponVisual;
     [SerializeField] ItemDataBase dataBase;
@@ -29,10 +30,7 @@ public class ActionController : MonoBehaviour
         selectAction = InputSystem.actions.FindAction("Select");
         throwAction = InputSystem.actions.FindAction("Throw");
         swingAction = InputSystem.actions.FindAction("Swing");
-        animator = GetComponent<Animator>();
-        childWeapon = weapon.transform.GetChild(0).gameObject;
-
-        
+        playerAnimator = GetComponent<Animator>();
     }
 
     private void OnEnable() {
@@ -108,10 +106,11 @@ public class ActionController : MonoBehaviour
             Destroy(rGb);
             return;
         }
-        itemGimmick.Initialize(getItems[selectNumber]);
-        //rGb.GetComponent<ItemGimmick>().Initialize(rGb,getItems[selectNumber]);
         rGb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
-        rGb.transform.rotation = this.transform.rotation * Quaternion.Euler(0f,180f,0f);
+        itemGimmick.Initialize(getItems[selectNumber]);
+        //rGb.transform.rotation = this.transform.rotation * Quaternion.Euler(0f,180f,0f);
+        
+        
         rGb.SetActive(true);
         if (sc.StockCount[selectNumber] <= 1)
         {
@@ -123,18 +122,14 @@ public class ActionController : MonoBehaviour
     }
     private void OnSelect(InputAction.CallbackContext context)
     {
-        if (selectNumber >= 3)
-        {
-            selectNumber = 0;
-        }
-        else
-        {
-            selectNumber++;
-        }
-        WeaponSwap();
+        // スロットを1つ進める
+        selectNumber = (selectNumber + 1) % 4;
+
+        // 選択中の枠を移動する
         sc.MoveFrame(selectNumber);
-        Debug.Log(selectNumber+"を選択中");
-        
+
+        // 選択中のアイテムIDを見て、武器を切り替える
+        ShowWeaponForSelectedSlot();
     }
     private void OnThrow(InputAction.CallbackContext context)
     {
@@ -147,10 +142,12 @@ public class ActionController : MonoBehaviour
             Destroy(rgb);
             return;
         }
-        itemGimmick.Initialize(getItems[selectNumber]);
-        //rgb.GetComponent<ItemGimmick>().Initialize(rgb,getItems[selectNumber]);
         rgb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
-        rgb.transform.rotation = this.transform.rotation* Quaternion.Euler(0f,180f,0f);
+        itemGimmick.Initialize(getItems[selectNumber]);
+        //rgb.transform.rotation = this.transform.rotation* Quaternion.Euler(0f,180f,0f);
+        //rgb.transform.rotation = this.transform.rotation* Quaternion.Euler(0f,180f,0f);
+        //rgb.GetComponent<ItemGimmick>().Initialize(rgb,getItems[selectNumber]);
+        
         rgb.SetActive(true);
         ItemGimmick rg = rgb.GetComponent<ItemGimmick>();
         //rg.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition;
@@ -177,18 +174,37 @@ public class ActionController : MonoBehaviour
     }
     private void OnSwing(InputAction.CallbackContext context)
     {
-        if(!(weapon.activeSelf))
+        // 武器がまだ出ていなければ出す
+        if (!weapon.activeSelf)
         {
-            WeaponSwap();
+            ShowWeaponForSelectedSlot();
             Debug.Log("武器を出した");
+            return;
+        }
+
+        // 振る武器のAnimatorを取得
+        
+         weaponAnimator = weaponObject.GetComponentInChildren<Animator>();
+        
+
+        if (weaponAnimator == null)
+        {
+            Debug.LogWarning("武器のAnimatorが見つかりません。");
+            return;
+        }
+
+        // アイテムの種類でトリガーを変える
+        int selectedItemId = GetSelectedItemId();
+        if (selectedItemId > 0 && (int)dataBase.GetItemTypeById(selectedItemId) == 4)
+        {
+            weaponAnimator.SetTrigger("IronBall");
         }
         else
         {
-            animator.SetTrigger("Weapon");
-            Debug.Log("武器をしまった");
+            weaponAnimator.SetTrigger("Weapon");
         }
-        
-        
+
+        Debug.Log("武器を振った");
     }
     
 
@@ -206,35 +222,120 @@ public class ActionController : MonoBehaviour
 
         }
     }
-    private void WeaponSwap()
+    private int GetSelectedItemId()
     {
-        if (getItems[selectNumber] == null)
+        // 何も持っていないときは 0 とする
+        if (selectNumber < 0 || selectNumber >= getItems.Count)
         {
-            weapon.SetActive(false);
-            Debug.Log("アイテムはなかったよ");
+            return 0;
         }
-        else
-        {
-            PresentWeaponVisual = childWeapon.GetComponent<SpriteRenderer>();
-            choicedWeaponVisual = dataBase.GetSpriteById(getItems[selectNumber]);
-            PresentWeaponVisual.sprite = choicedWeaponVisual;
-            weapon.SetActive(true);
-        }
-        
-    }
-    private void SetItem(GameObject gb,int i,bool isexisted)
-    {
-        if (!isexisted)
-        {
-            sc.RefreshUI(gb);
 
-        }
-        ic.DeleteSearchedItem(gb);
-        Destroy(gb);
-        WeaponSwap();
-        sc.AddStock(i);
-        
-        
+        return getItems[selectNumber];
     }
+
+    private void ShowWeaponForSelectedSlot()
+    {
+        if (weapon == null)
+        {
+            Debug.LogWarning("Weaponがまだ設定されていません。");
+            return;
+        }
+
+        // 前の武器を消す
+        for (int i = weapon.transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(weapon.transform.GetChild(i).gameObject);
+        }
+
+        int selectedItemId = GetSelectedItemId();
+
+        // 空のスロットなら武器を隠す
+        if (selectedItemId <= 0)
+        {
+            weaponObject = null;
+            weaponAnimator = null;
+            weapon.SetActive(false);
+            return;
+        }
+
+        // アイテムIDからPrefabを探す
+        GameObject weaponPrefab = dataBase.GetIntanceById(selectedItemId);
+        if (weaponPrefab == null)
+        {
+            Debug.LogWarning("ID " + selectedItemId + " のPrefabが見つかりません。");
+            weaponObject = null;
+            weaponAnimator = null;
+            weapon.SetActive(false);
+            return;
+        }
+
+        // 武器を生成して、weaponの子にする
+        weaponObject = Instantiate(weaponPrefab, weapon.transform);
+        weaponObject.SetActive(false);
+        weaponObject.transform.localPosition = Vector3.zero;
+        weaponObject.transform.localRotation = Quaternion.identity;
+        weaponObject.transform.localScale = Vector3.one;
+
+        // 生成した武器の見た目とAnimatorを初期化する
+        ItemGimmick weaponItem = weaponObject.GetComponent<ItemGimmick>();
+        if (weaponItem != null)
+        {
+            weaponItem.InitializeForWeapon(selectedItemId);
+        }
+
+        // 持っている間はCollider同士がぶつからないようにする
+        Collider[] weaponColliders = weaponObject.GetComponentsInChildren<Collider>(true);
+        foreach (Collider weaponCollider in weaponColliders)
+        {
+            weaponCollider.enabled = false;
+        }
+
+        Rigidbody weaponRigidbody = weaponObject.GetComponent<Rigidbody>();
+        if (weaponRigidbody != null)
+        {
+            weaponRigidbody.isKinematic = true;
+            weaponRigidbody.useGravity = false;
+            weaponRigidbody.linearVelocity = Vector3.zero;
+            weaponRigidbody.angularVelocity = Vector3.zero;
+        }
+
+        // 生成直後にAnimatorを有効にしてから表示する
+        weaponAnimator =weaponObject.GetComponentInChildren<Animator>(true);
+
+        if (weaponAnimator == null)
+        {
+            Debug.LogWarning("武器のAnimatorが見つかりません。");
+            weaponObject.SetActive(true);
+            weapon.SetActive(true);
+            return;
+        }
+
+        weaponObject.SetActive(true);
+        weapon.SetActive(true);
+
+        weaponAnimator.enabled = true;
+        weaponAnimator.Rebind();
+        weaponAnimator.Update(0f);
+
+        Debug.Log("武器を表示: ID = " + selectedItemId);
+    }
+        
+    
+    private void SetItem(GameObject gb, int i, bool isexisted)
+{
+    if (!isexisted)
+    {
+        sc.RefreshUI(gb);
+    }
+
+    ic.DeleteSearchedItem(gb);
+    Destroy(gb);
+
+    sc.AddStock(i);
+
+    selectNumber = i;
+    sc.MoveFrame(selectNumber);
+    ShowWeaponForSelectedSlot();
+}
     
 }

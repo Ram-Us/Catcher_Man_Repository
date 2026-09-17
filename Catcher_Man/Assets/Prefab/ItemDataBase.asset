@@ -18,6 +18,8 @@ MonoBehaviour:
     itemType: 0
     itemName: "\u6728\u7BB1"
     cost: 1
+    position: {x: 0, y: 0, z: 0}
+    size: {x: 1, y: 1, z: 1}
     speed: 3
     attack: 1
     colliderSize: {x: 1.4, y: 1.4, z: 2}
@@ -29,6 +31,8 @@ MonoBehaviour:
     itemType: 0
     itemName: "\u96D1\u8349"
     cost: 1
+    position: {x: 0, y: 0, z: 0}
+    size: {x: 1, y: 1, z: 1}
     speed: 5
     attack: 0
     colliderSize: {x: 0.7, y: 0.3, z: 0.2}
@@ -36,46 +40,67 @@ MonoBehaviour:
     instance: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
     rotated: 0
   - id: 3
-    icon: {fileID: 21300136, guid: 7810966f0f690954c87305933cabf2b0, type: 3}
+    icon: {fileID: -3049067163339015078, guid: c016f0eb0a188a14ab7f86d910097523, type: 3}
     itemType: 0
-    itemName: "\u77F3"
-    cost: 2
-    speed: 5
-    attack: 1
-    colliderSize: {x: 1.5, y: 0.9, z: 1}
-    colliderCenterSize: {x: 0, y: 0.3, z: 0}
-    instance: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
-    rotated: 0
-  - id: 4
-    icon: {fileID: 21300260, guid: 7810966f0f690954c87305933cabf2b0, type: 3}
-    itemType: 0
-    itemName: "\u9244\u7403"
+    itemName: "\u6B6F\u8ECA"
     cost: 3
+    position: {x: 0, y: 0, z: 0}
+    size: {x: 1, y: 1, z: 1}
     speed: 5
     attack: 5
     colliderSize: {x: 0.8, y: 0.8, z: 0.8}
     colliderCenterSize: {x: 0, y: 0, z: 0}
     instance: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
     rotated: 0
-  - id: 5
+  - id: 4
     icon: {fileID: 21300028, guid: 7810966f0f690954c87305933cabf2b0, type: 3}
     itemType: 2
     itemName: "\u6728\u306E\u68D2"
     cost: 2
+    position: {x: 0, y: 0, z: 0}
+    size: {x: 1, y: 1, z: 1}
     speed: 8
     attack: 1
     colliderSize: {x: 0.36, y: 1.05, z: 1}
     colliderCenterSize: {x: 0, y: 0.55, z: 0.3}
     instance: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
     rotated: 0
-  - id: 6
+  - id: 5
     icon: {fileID: 21300070, guid: 7810966f0f690954c87305933cabf2b0, type: 3}
     itemType: 3
     itemName: "\u306F\u3057\u3054"
     cost: 3
+    position: {x: -0.365, y: 0, z: 0}
+    size: {x: 1, y: 1, z: 1}
     speed: 5
     attack: 1
     colliderSize: {x: 1, y: 3, z: 0.25}
     colliderCenterSize: {x: 0, y: 1.53, z: 0}
+    instance: {fileID: 4341995269951199168, guid: eda3fb107fcf91747bdd93b4a8abfcef, type: 3}
+    rotated: 0
+  - id: 6
+    icon: {fileID: 21300168, guid: 7810966f0f690954c87305933cabf2b0, type: 3}
+    itemType: 2
+    itemName: "\u5263"
+    cost: 3
+    position: {x: 0, y: 0, z: 0}
+    size: {x: 1, y: 1, z: 1}
+    speed: 5
+    attack: 1
+    colliderSize: {x: 0.36, y: 1.05, z: 1}
+    colliderCenterSize: {x: 0, y: 0.55, z: 0.3}
     instance: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
+    rotated: 0
+  - id: 7
+    icon: {fileID: 21300000, guid: 60e5d93de53da5642a38fce5925c3efa, type: 3}
+    itemType: 4
+    itemName: "\u9244\u7403"
+    cost: 3
+    position: {x: 0, y: 0, z: 0}
+    size: {x: 3, y: 3, z: 3}
+    speed: 5
+    attack: 1
+    colliderSize: {x: 1.24, y: 0.25, z: 0.1}
+    colliderCenterSize: {x: -0.7, y: 0, z: 0}
+    instance: {fileID: 4341995269951199168, guid: 31c67991bf6907d4f9d756366a5866e3, type: 3}
     rotated: 0
