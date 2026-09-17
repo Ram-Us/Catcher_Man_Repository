@@ -33,7 +33,16 @@ public class SlotController : MonoBehaviour
             Image SItem = sItem.GetComponent<Image>();
             if(SItem.sprite == baseSprite)
             {
-                sr = getItem.GetComponent<SpriteRenderer>();
+                if (getItem.GetComponent<ItemGimmick>().Id== 7)
+                {
+                    GameObject ironBall = getItem.transform.GetChild(0).gameObject;
+                    sr = ironBall.GetComponent<SpriteRenderer>();
+
+                }
+                else
+                {
+                    sr = getItem.GetComponent<SpriteRenderer>(); 
+                }
                 SItem.sprite = sr.sprite;
                 //getItem.SetActive(false);
                 Debug.Log(i+"番目に入れたぞ");

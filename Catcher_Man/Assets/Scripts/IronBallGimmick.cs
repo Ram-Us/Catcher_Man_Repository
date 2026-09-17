@@ -6,9 +6,9 @@ using System.Runtime.CompilerServices;
 
 
 
-public class ItemGimmick : MonoBehaviour {
+public class IronBallGimmick : MonoBehaviour {
 
-    [SerializeField] private GameObject frame;
+    [SerializeField] private GameObject frame,ironBall;
     private SpriteRenderer sr,dsr,fsr;
     [SerializeField] private ItemDataBase db;
     [SerializeField] int id;
@@ -21,10 +21,10 @@ public class ItemGimmick : MonoBehaviour {
     {
         if (frame != null)
         {
-            this.GetComponent<Animator>().enabled  =  false;
             frame.SetActive(false);
         }
-        //this.transform.rotation *= Quaternion.Euler(0f,180f,0f);
+        this.transform.rotation *= Quaternion.Euler(0f,180f,0f);
+        
         
     }
 
@@ -56,23 +56,15 @@ public class ItemGimmick : MonoBehaviour {
             Debug.LogError($"ID {id} のアイテムがデータベースにありません。", this);
             return;
         }
-        if (idb.ItemType == ItemType.IronBall)
-        {
-            if (transform.childCount > 0)
-            {
-                sr = transform.GetChild(0).GetComponent<SpriteRenderer>();
-            }
-        }
-        else
-        {
-            sr = GetComponent<SpriteRenderer>();
-        }
-        
+
+        ironBall = this.transform.GetChild(0).gameObject;
+        sr = ironBall.GetComponent<SpriteRenderer>();
         if (sr == null)
         {
             Debug.LogError("SpriteRendererがありません。", this);
             return;
         }
+        
 
         sr.sprite = idb.Icon;
 
@@ -109,51 +101,6 @@ public class ItemGimmick : MonoBehaviour {
         isInitialized = true;
     }
 
-    public void InitializeForWeapon(int itemId)
-    {
-        id = itemId;
-
-        if (db == null)
-        {
-            Debug.LogError("ItemDataBaseが設定されていません。", this);
-            return;
-        }
-
-        var itemData = db.GetItemById(id);
-        if (itemData == null)
-        {
-            Debug.LogError($"ID {id} のアイテムがデータベースにありません。", this);
-            return;
-        }
-
-        if (itemData.ItemType == ItemType.IronBall)
-        {
-            if (transform.childCount > 0)
-            {
-                sr = transform.GetChild(0).GetComponent<SpriteRenderer>();
-            }
-        }
-        else
-        {
-            sr = GetComponent<SpriteRenderer>();
-        }
-
-        if (sr != null)
-        {
-            sr.sprite = itemData.Icon;
-        }
-
-        this.transform.localScale = itemData.Size;
-
-        Animator weaponAnimator = GetComponentInChildren<Animator>(true);
-        if (weaponAnimator != null)
-        {
-            weaponAnimator.enabled = true;
-        }
-
-        isInitialized = true;
-    }
-
     public void EmphasisItems(bool sw)
     {
         frame.SetActive(sw);
@@ -161,11 +108,11 @@ public class ItemGimmick : MonoBehaviour {
     }
     private void OnCollisionEnter(Collision collision)
     {
-       /* if(collision.gameObject.CompareTag("Item"))
+        if(collision.gameObject.CompareTag("Item"))
         {
             Debug.Log("アイテムに触れた");
             Destroy(this.gameObject);
-        }*/
+        }
         if(collision.gameObject.CompareTag("Ground"))
         {
             Rigidbody rb = GetComponent<Rigidbody>();

@@ -9,7 +9,8 @@ public enum ItemType
     Enemy,    // 回復
 
     Bullet,   //弾
-    Ladder    //はしご
+    Ladder,    //はしご
+    IronBall  //鉄球
 }
 
 [System.Serializable]
@@ -26,6 +27,10 @@ public class Item
     public string ItemName => itemName;
     [SerializeField] private int cost;    // 効果値
     public int Cost => cost;
+    [SerializeField] private Vector3 position = new Vector3(0f,0f,0f);  //アイテムのサイズ
+    public Vector3 Position => position;
+    [SerializeField] private Vector3 size = new Vector3(1f,1f,1f);  //アイテムのサイズ
+    public Vector3 Size => size;
     [SerializeField] private float speed; //投げ時のスピード
     public float Speed => speed;
     [SerializeField] private int attack; //振り時のダメージ量
@@ -38,8 +43,10 @@ public class Item
 
     [SerializeField] private GameObject instance;  //取得したアイテムのインスタンス
 
-    [SerializeField] private bool rotated = true;
+    [SerializeField] private bool rotated = true;  //回転するか否か
     public bool Rotated => rotated;
+
+
     public GameObject Instance => instance;
 
      

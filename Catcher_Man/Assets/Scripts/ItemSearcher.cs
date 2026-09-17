@@ -78,6 +78,7 @@ public class ItemSearcher : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         aroundItems.Remove(other.gameObject);
+        DeleteSearchedItem(other.gameObject);
     }
 
     public void DeleteSearchedItem(GameObject item)
