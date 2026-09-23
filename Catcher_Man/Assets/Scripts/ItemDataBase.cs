@@ -46,6 +46,14 @@ public class Item
     [SerializeField] private bool rotated = true;  //回転するか否か
     public bool Rotated => rotated;
 
+    [SerializeField] private Vector3 equippedItemScale;
+    public Vector3 EquippedItemScale => equippedItemScale;
+
+    [SerializeField] private int[] rect;
+    public int[] Rect => rect;
+
+    
+
 
     public GameObject Instance => instance;
 
@@ -154,6 +162,42 @@ public class ItemDataBase : ScriptableObject
         
         return 0;
     }
+    public Vector3 GetEquippedItemScaleById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.EquippedItemScale;
+            }
+        }
+        return new Vector3(0f,0f,0f);
+    }
+    public int GetWidthById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.Rect[0];
+            }
+        }
+        
+        return 0;
+    }
+    public int GetHeightById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.Rect[1];
+            }
+        }
+        
+        return 0;
+    }
+
     
     public int GetId(GameObject gameObject)
     {

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,19 +8,27 @@ public class MoveController : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpPower = 7f;
     [SerializeField] private float climbSpeed = 1f;
+    [SerializeField] private ItemDataBase db;
 
     private Rigidbody rb;
+    private ActionController actionController;
     private InputAction moveAction;
     private InputAction jumpAction;
+    private readonly HashSet<Collider> supportContacts = new();
+    private readonly HashSet<Collider> ladderContacts = new();
 
     private float moveInput;
-    private bool jumpRequested, isGround,isItem, isTouchedItem, isTouchingLadder, climbRequested;
-    [SerializeField] private ItemDataBase db;
+    private bool jumpRequested;
+    private bool jumpHeld;
+    private bool jumpConsumed;
+    private bool wasClimbing;
+    [SerializeField] private bool isGround;
+    [SerializeField] private bool isTouchingLadder;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-
+        actionController = GetComponent<ActionController>();
         moveAction = InputSystem.actions.FindAction("Move");
         jumpAction = InputSystem.actions.FindAction("Jump");
     }
@@ -29,7 +38,6 @@ public class MoveController : MonoBehaviour
         moveAction.performed += OnMove;
         moveAction.canceled += OnMoveCanceled;
         jumpAction.started += OnJump;
-        jumpAction.performed += OnUp;
         jumpAction.canceled += OnJumpCanceled;
     }
 
@@ -38,54 +46,71 @@ public class MoveController : MonoBehaviour
         moveAction.performed -= OnMove;
         moveAction.canceled -= OnMoveCanceled;
         jumpAction.started -= OnJump;
-        jumpAction.performed -= OnUp;
         jumpAction.canceled -= OnJumpCanceled;
+        jumpRequested = false;
+        jumpHeld = false;
+        wasClimbing = false;
+        jumpConsumed = false;
+        supportContacts.Clear();
+        ladderContacts.Clear();
+        isGround = false;
+        isTouchingLadder = false;
     }
 
     private void FixedUpdate()
     {
-        
-        Move();
-        
-        
-
-        
-        //Debug.Log(jumpRequested + "and" + isGround);
-
-        if ((jumpRequested && isGround)||(jumpRequested && isItem))
+        // Destroy済みの接触相手が残っても接地やはしご扱いを続けない。
+        supportContacts.RemoveWhere(c => c == null || !c.enabled || !c.gameObject.activeInHierarchy);
+        ladderContacts.RemoveWhere(c =>
         {
-            if (!isTouchingLadder)
+            if (c == null || !c.enabled || !c.gameObject.activeInHierarchy)
             {
-                Jump();
-                Debug.Log("ホップステップジャンプ！");
+                return true;
             }
-            if (isGround)
-            {
-                isGround = false;
-            }else if (isItem)
-            {
-                isItem = false;
-            }
-            
-            jumpRequested = false;
-        }
-        
+            ItemGimmick item = c.GetComponentInParent<ItemGimmick>();
+            return item == null || item.IsAttached;
+        });
 
-        if (isTouchingLadder && climbRequested)
+        isGround = supportContacts.Count > 0;
+        isTouchingLadder = ladderContacts.Count > 0 &&
+                           (actionController == null || !actionController.IsLadderEquipped);
+
+        if (!isGround)
+        {
+            jumpConsumed = false;
+        }
+
+        Move();
+
+        bool jumpedThisStep = jumpRequested && isGround && !jumpConsumed;
+        if (jumpedThisStep)
+        {
+            Jump();
+            jumpConsumed = true;
+        }
+        // startedは一度だけ処理する。着地後まで入力要求を持ち越さない。
+        jumpRequested = false;
+
+        bool climbing = isTouchingLadder && jumpHeld && !jumpedThisStep;
+        if (climbing)
         {
             Vector3 velocity = rb.linearVelocity;
-            velocity.y = climbSpeed;
+            velocity.y = Mathf.Max(velocity.y, climbSpeed);
             rb.linearVelocity = velocity;
         }
+        else if (wasClimbing && rb.linearVelocity.y > 0f)
+        {
+            Vector3 velocity = rb.linearVelocity;
+            velocity.y = 0f;
+            rb.linearVelocity = velocity;
+        }
+        wasClimbing = climbing;
     }
 
     private void OnMove(InputAction.CallbackContext context)
     {
         Vector2 input = context.ReadValue<Vector2>();
-
-        // 入力上の左右方向を、ワールド座標のZ軸に使う
         moveInput = input.x;
-        
     }
 
     private void OnMoveCanceled(InputAction.CallbackContext context)
@@ -95,34 +120,21 @@ public class MoveController : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext context)
     {
-        if (isTouchingLadder)
-        {
-            climbRequested = true;
-        }
-        else
-        {
-            jumpRequested = true;
-        }
+        jumpHeld = true;
+        jumpRequested = true;
     }
 
     private void OnJumpCanceled(InputAction.CallbackContext context)
     {
-        climbRequested = false;
-    }
-    private void OnUp(InputAction.CallbackContext context)
-    {
-        
+        jumpHeld = false;
+        jumpRequested = false;
     }
 
     private void Move()
     {
         Vector3 velocity = rb.linearVelocity;
-
         velocity.z = moveInput * moveSpeed;
-
-        // X方向には移動させない
         velocity.x = 0f;
-
         rb.linearVelocity = velocity;
     }
 
@@ -135,38 +147,72 @@ public class MoveController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Ground"))
+        UpdateContacts(collision);
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        UpdateContacts(collision);
+    }
+
+    private void UpdateContacts(Collision collision)
+    {
+        Collider other = collision.collider;
+        ItemGimmick item = other.GetComponentInParent<ItemGimmick>();
+
+        if (collision.gameObject.CompareTag("Ground") || item != null)
         {
-            //Debug.Log(isGround);
-            isGround = true;
-        }
-        if (collision.gameObject.CompareTag("Item"))
-        {
-            isItem = true;
+            bool standingOnTop = false;
+            for (int i = 0; i < collision.contactCount; i++)
+            {
+                if (collision.GetContact(i).normal.y > 0.5f)
+                {
+                    standingOnTop = true;
+                    break;
+                }
+            }
+            if (standingOnTop && (item == null || !item.IsAttached))
+            {
+                supportContacts.Add(other);
+            }
+            else
+            {
+                supportContacts.Remove(other);
+            }
         }
 
-         ItemGimmick item = collision.gameObject.GetComponentInParent<ItemGimmick>();
-
-        if (item != null &&
-            db.GetItemTypeById(item.Id) == ItemType.Ladder)
+        if (item != null && db != null &&
+            db.GetItemTypeById(item.Id) == ItemType.Ladder && !item.IsAttached)
         {
-            isTouchingLadder = true;
+            ladderContacts.Add(other);
+        }
+        else
+        {
+            ladderContacts.Remove(other);
         }
     }
 
-    
-    
     private void OnCollisionExit(Collision collision)
     {
-        
-        ItemGimmick item = collision.gameObject.GetComponentInParent<ItemGimmick>();
+        // 地面との離脱時にも呼ばれるため、ItemGimmickを前提にしない。
+        supportContacts.Remove(collision.collider);
+        ladderContacts.Remove(collision.collider);
+    }
 
-        if (item != null &&
-            db.GetItemTypeById(item.Id) == ItemType.Ladder)
+    // 拾ったオブジェクトはOnCollisionExitを経ずに破棄されることがある。
+    public void ForgetWorldItem(GameObject itemObject)
+    {
+        if (itemObject == null)
         {
-            isTouchingLadder = false;
-            climbRequested = false;
+            return;
         }
-        
+        foreach (Collider itemCollider in itemObject.GetComponentsInChildren<Collider>(true))
+        {
+            supportContacts.Remove(itemCollider);
+            ladderContacts.Remove(itemCollider);
+        }
+        isGround = supportContacts.Count > 0;
+        isTouchingLadder = ladderContacts.Count > 0 &&
+                           (actionController == null || !actionController.IsLadderEquipped);
     }
 }

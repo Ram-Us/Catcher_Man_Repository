@@ -17,11 +17,18 @@ public class ItemGimmick : MonoBehaviour {
 
     private BoxCollider cl;
 
+    [SerializeField] private bool isAttached;
+    public bool IsAttached => isAttached;
+
     void Awake()
     {
         if (frame != null)
         {
-            this.GetComponent<Animator>().enabled  =  false;
+            Animator itemAnimator = GetComponent<Animator>();
+            if (itemAnimator != null)
+            {
+                itemAnimator.enabled = false;
+            }
             frame.SetActive(false);
         }
         //this.transform.rotation *= Quaternion.Euler(0f,180f,0f);
@@ -104,6 +111,7 @@ public class ItemGimmick : MonoBehaviour {
             GetComponent<Rigidbody>().constraints &= ~RigidbodyConstraints.FreezePositionY;
             //GetComponent<Rigidbody>().isKinematic = false;
         }
+        isAttached = false;
         
 
         isInitialized = true;
@@ -151,6 +159,7 @@ public class ItemGimmick : MonoBehaviour {
             weaponAnimator.enabled = true;
         }
 
+        isAttached = true;
         isInitialized = true;
     }
 
@@ -174,6 +183,7 @@ public class ItemGimmick : MonoBehaviour {
         }
         
     }
+    
     private void OnCollisionExit(Collision collision)
     {
         if(!collision.gameObject.CompareTag("Ground"))
@@ -195,6 +205,16 @@ public class ItemGimmick : MonoBehaviour {
         itemData.Attack = db.GetAttackById(id);
         
     }*/
+
+    public bool GetAttach()
+    {
+        return IsAttached;
+    }
+    public void SetAttach(bool isChecked)
+    {
+        isAttached = isChecked;
+        
+    }
 
     
 }

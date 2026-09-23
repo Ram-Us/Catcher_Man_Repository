@@ -43,6 +43,9 @@ public class SlotController : MonoBehaviour
                 {
                     sr = getItem.GetComponent<SpriteRenderer>(); 
                 }
+                RectTransform rect = SItem.rectTransform;
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,dataBase.GetWidthById(getItem.GetComponent<ItemGimmick>().Id));
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,dataBase.GetHeightById(getItem.GetComponent<ItemGimmick>().Id));
                 SItem.sprite = sr.sprite;
                 //getItem.SetActive(false);
                 Debug.Log(i+"番目に入れたぞ");
@@ -55,6 +58,8 @@ public class SlotController : MonoBehaviour
     }
     public void DeleteUI(int r)
     {
+        RectTransform rect = slotItem[r].rectTransform;
+        rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,100);
         slotItem[r].sprite = baseSprite;
     }
     public void MoveFrame(int n)
