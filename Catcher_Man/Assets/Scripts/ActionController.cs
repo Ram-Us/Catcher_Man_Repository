@@ -13,10 +13,25 @@ public class ActionController : MonoBehaviour
     private int selectNumber,id = 0;
     public int SelectNumber => selectNumber;
     [SerializeField]float shootSpeed = 5f;
+    [Min(0f)] private float equippedItemScale;
 
     [SerializeField]private List<int> getItems = new();
     [SerializeField] private GameObject shootPoint,weapon;
     private GameObject weaponObject;
+    public bool IsLadderEquipped
+    {
+        get
+        {
+            if (weaponObject == null || !weaponObject.activeInHierarchy || dataBase == null)
+            {
+                return false;
+            }
+
+            ItemGimmick equippedItem = weaponObject.GetComponent<ItemGimmick>();
+            return equippedItem != null && equippedItem.IsAttached &&
+                   dataBase.GetItemTypeById(equippedItem.Id) == ItemType.Ladder;
+        }
+    }
     private Animator weaponAnimator;
     private Animator playerAnimator;
     SpriteRenderer PresentWeaponVisual;
@@ -108,6 +123,7 @@ public class ActionController : MonoBehaviour
         }
         rGb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
         itemGimmick.Initialize(getItems[selectNumber]);
+        itemGimmick.SetAttach(false);
         //rGb.transform.rotation = this.transform.rotation * Quaternion.Euler(0f,180f,0f);
         
         
@@ -144,6 +160,7 @@ public class ActionController : MonoBehaviour
         }
         rgb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
         itemGimmick.Initialize(getItems[selectNumber]);
+        itemGimmick.SetAttach(false);
         //rgb.transform.rotation = this.transform.rotation* Quaternion.Euler(0f,180f,0f);
         //rgb.transform.rotation = this.transform.rotation* Quaternion.Euler(0f,180f,0f);
         //rgb.GetComponent<ItemGimmick>().Initialize(rgb,getItems[selectNumber]);
@@ -151,14 +168,21 @@ public class ActionController : MonoBehaviour
         rgb.SetActive(true);
         ItemGimmick rg = rgb.GetComponent<ItemGimmick>();
         //rg.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition;
-        rg.GetComponent<Rigidbody>().constraints &= ~RigidbodyConstraints.FreezePositionY;
         rg.GetComponent<Rigidbody>().constraints &= ~RigidbodyConstraints.FreezePositionZ;
         if ((int)dataBase.GetItemTypeById(getItems[selectNumber] )== 2){
             rg.GetComponent<Rigidbody>().useGravity = false;
         }
-        rg.GetComponent<Rigidbody>().AddForce(-this.transform.right * shootSpeed, ForceMode.Impulse);
-        
-        
+        rg.GetComponent<Rigidbody>().AddForce(-this.transform.right * dataBase.GetSpeedById(getItems[selectNumber]), ForceMode.Impulse);
+
+
+        if (dataBase.GetItemNameById(getItems[selectNumber]) == "歯車")
+        {
+            weaponAnimator = rg.GetComponentInChildren<Animator>();
+            weaponAnimator.enabled = true;
+
+            weaponAnimator.SetTrigger("Gear");
+            Debug.Log("ぎああああ");
+        }
         
         if (sc.StockCount[selectNumber] <= 1)
         {
@@ -243,7 +267,8 @@ public class ActionController : MonoBehaviour
 
         // 前の武器を消す
         for (int i = weapon.transform.childCount - 1; i >= 0; i--)
-        {
+        {   
+
             Destroy(weapon.transform.GetChild(i).gameObject);
         }
 
@@ -270,11 +295,10 @@ public class ActionController : MonoBehaviour
         }
 
         // 武器を生成して、weaponの子にする
-        weaponObject = Instantiate(weaponPrefab, weapon.transform);
+        weaponObject = Instantiate(weaponPrefab);
+        weaponObject.transform.SetParent(weapon.transform, false);
+        weaponObject.transform.localPosition = new Vector3(0f, 0f, 0f);
         weaponObject.SetActive(false);
-        weaponObject.transform.localPosition = Vector3.zero;
-        weaponObject.transform.localRotation = Quaternion.identity;
-        weaponObject.transform.localScale = Vector3.one;
 
         // 生成した武器の見た目とAnimatorを初期化する
         ItemGimmick weaponItem = weaponObject.GetComponent<ItemGimmick>();
@@ -299,23 +323,21 @@ public class ActionController : MonoBehaviour
             weaponRigidbody.angularVelocity = Vector3.zero;
         }
 
-        // 生成直後にAnimatorを有効にしてから表示する
-        weaponAnimator =weaponObject.GetComponentInChildren<Animator>(true);
-
-        if (weaponAnimator == null)
-        {
-            Debug.LogWarning("武器のAnimatorが見つかりません。");
-            weaponObject.SetActive(true);
-            weapon.SetActive(true);
-            return;
-        }
-
         weaponObject.SetActive(true);
         weapon.SetActive(true);
 
-        weaponAnimator.enabled = true;
-        weaponAnimator.Rebind();
-        weaponAnimator.Update(0f);
+        weaponAnimator = weaponObject.GetComponentInChildren<Animator>(true);
+
+        if (weaponAnimator != null)
+        {
+            weaponAnimator.enabled = true;
+            weaponAnimator.Rebind();
+            weaponAnimator.Update(0f);
+        }
+
+        weaponObject.transform.localPosition = new Vector3(0f, 0f, 0f);
+        weaponObject.transform.localRotation = Quaternion.identity;
+        weaponObject.transform.localScale = dataBase.GetEquippedItemScaleById(getItems[selectNumber]);
 
         Debug.Log("武器を表示: ID = " + selectedItemId);
     }
@@ -329,7 +351,14 @@ public class ActionController : MonoBehaviour
     }
 
     ic.DeleteSearchedItem(gb);
+    MoveController moveController = GetComponent<MoveController>();
+    if (moveController != null)
+    {
+        moveController.ForgetWorldItem(gb);
+    }
     Destroy(gb);
+    isTouched = false;
+    this.gb = null;
 
     sc.AddStock(i);
 
