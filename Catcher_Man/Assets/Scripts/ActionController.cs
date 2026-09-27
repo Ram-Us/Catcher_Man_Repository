@@ -175,7 +175,7 @@ public class ActionController : MonoBehaviour
         rg.GetComponent<Rigidbody>().AddForce(-this.transform.right * dataBase.GetSpeedById(getItems[selectNumber]), ForceMode.Impulse);
 
 
-        if (dataBase.GetItemNameById(getItems[selectNumber]) == "歯車")
+        if ((int)dataBase.GetItemTypeById(getItems[selectNumber]) == 2)
         {
             weaponAnimator = rg.GetComponentInChildren<Animator>();
             weaponAnimator.enabled = true;
@@ -188,6 +188,10 @@ public class ActionController : MonoBehaviour
         {
             sc.DeleteUI(selectNumber);
             getItems[selectNumber]=0;
+        }
+        else
+        {
+            ShowWeaponForSelectedSlot();
         }
         sc.SubStock(selectNumber);
         
