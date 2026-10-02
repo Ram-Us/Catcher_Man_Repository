@@ -133,6 +133,10 @@ public class ActionController : MonoBehaviour
             sc.DeleteUI(selectNumber);
             getItems[selectNumber]=0;
         }
+        else
+        {
+            ShowWeaponForSelectedSlot();
+        }
         sc.SubStock(selectNumber);
         Debug.Log(selectNumber+"番目のオブジェクトを設置！");
     }
@@ -166,22 +170,22 @@ public class ActionController : MonoBehaviour
         //rgb.GetComponent<ItemGimmick>().Initialize(rgb,getItems[selectNumber]);
         
         rgb.SetActive(true);
-        ItemGimmick rg = rgb.GetComponent<ItemGimmick>();
+        Rigidbody rg = rgb.GetComponent<Rigidbody>();
         //rg.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition;
-        rg.GetComponent<Rigidbody>().constraints &= ~RigidbodyConstraints.FreezePositionZ;
-        if ((int)dataBase.GetItemTypeById(getItems[selectNumber] )== 2){
-            rg.GetComponent<Rigidbody>().useGravity = false;
+        rg.constraints &= ~RigidbodyConstraints.FreezePositionZ;
+        if ((int)dataBase.GetItemTypeById(getItems[selectNumber] )!= 6){
+            rg.useGravity = false;
         }
-        rg.GetComponent<Rigidbody>().AddForce(-this.transform.right * dataBase.GetSpeedById(getItems[selectNumber]), ForceMode.Impulse);
+        rg.AddForce(-this.transform.right * dataBase.GetSpeedById(getItems[selectNumber]), ForceMode.Impulse);
 
 
-        if ((int)dataBase.GetItemTypeById(getItems[selectNumber]) == 2)
+        if ((int)dataBase.GetItemTypeById(getItems[selectNumber]) == 5)
         {
-            weaponAnimator = rg.GetComponentInChildren<Animator>();
-            weaponAnimator.enabled = true;
-
-            weaponAnimator.SetTrigger("Gear");
+            rgb.GetComponent<ItemGimmick>().SetThrown(true);
+            rg.constraints &= ~RigidbodyConstraints.FreezeRotationZ;
+            rg.AddTorque(Vector3.right   * 5f, ForceMode.Impulse);
             Debug.Log("ぎああああ");
+            //weaponAnimator.SetTrigger("Gear");
         }
         
         if (sc.StockCount[selectNumber] <= 1)
