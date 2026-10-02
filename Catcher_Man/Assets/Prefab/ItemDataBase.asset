@@ -45,7 +45,7 @@ MonoBehaviour:
     rect: 5000000050000000
   - id: 3
     icon: {fileID: -3049067163339015078, guid: c016f0eb0a188a14ab7f86d910097523, type: 3}
-    itemType: 2
+    itemType: 5
     itemName: "\u6B6F\u8ECA"
     cost: 3
     position: {x: 0, y: 0, z: 0}
@@ -60,13 +60,13 @@ MonoBehaviour:
     rect: 6400000064000000
   - id: 4
     icon: {fileID: 21300028, guid: 7810966f0f690954c87305933cabf2b0, type: 3}
-    itemType: 2
+    itemType: 5
     itemName: "\u6728\u306E\u68D2"
     cost: 2
     position: {x: 0, y: 0, z: 0}
     size: {x: 1, y: 1, z: 1}
     speed: 8
-    attack: 1
+    attack: 2
     colliderSize: {x: 0.36, y: 1.05, z: 1}
     colliderCenterSize: {x: 0, y: 0.55, z: 0.3}
     instance: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
@@ -90,7 +90,7 @@ MonoBehaviour:
     rect: 3200000064000000
   - id: 6
     icon: {fileID: 21300168, guid: 7810966f0f690954c87305933cabf2b0, type: 3}
-    itemType: 2
+    itemType: 5
     itemName: "\u5263"
     cost: 3
     position: {x: 0, y: 0, z: 0}
@@ -111,7 +111,7 @@ MonoBehaviour:
     position: {x: 0, y: 0, z: 0}
     size: {x: 2.8, y: 2.6, z: 3}
     speed: 5
-    attack: 1
+    attack: 10
     colliderSize: {x: 1.24, y: 0.25, z: 0.1}
     colliderCenterSize: {x: -0.7, y: 0, z: 0}
     instance: {fileID: 4341995269951199168, guid: 31c67991bf6907d4f9d756366a5866e3, type: 3}

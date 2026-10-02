@@ -10,7 +10,12 @@ public enum ItemType
 
     Bullet,   //弾
     Ladder,    //はしご
-    IronBall  //鉄球
+    IronBall,  //鉄球
+
+    RotatedBullet, //回る弾
+
+    HeavyObject     //重いオブジェクト
+
 }
 
 [System.Serializable]
@@ -51,6 +56,7 @@ public class Item
 
     [SerializeField] private int[] rect;
     public int[] Rect => rect;
+
 
     
 
@@ -162,6 +168,17 @@ public class ItemDataBase : ScriptableObject
         
         return 0;
     }
+    public bool GetRotatedById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.Rotated;
+            }
+        }
+        return false;
+    }
     public Vector3 GetEquippedItemScaleById(int id)
     {
         foreach (var item in items)
@@ -203,6 +220,18 @@ public class ItemDataBase : ScriptableObject
     {
         ItemGimmick itemData = gameObject.GetComponent<ItemGimmick>();
         return itemData.Id;
+    }
+    public bool GetRotated(GameObject gameObject)
+    {
+        ItemGimmick itemData = gameObject.GetComponent<ItemGimmick>();
+        foreach (var item in items)
+        {
+            if (item.Id == itemData.Id)
+            {
+                return item.Rotated;
+            }
+        }
+        return false;
     }
 
     

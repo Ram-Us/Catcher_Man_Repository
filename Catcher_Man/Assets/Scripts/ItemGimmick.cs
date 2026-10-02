@@ -19,6 +19,8 @@ public class ItemGimmick : MonoBehaviour {
 
     [SerializeField] private bool isAttached;
     public bool IsAttached => isAttached;
+    [SerializeField] private bool isThrown;
+    public bool IsThrown => isThrown;
 
     void Awake()
     {
@@ -159,8 +161,9 @@ public class ItemGimmick : MonoBehaviour {
             weaponAnimator.enabled = true;
         }
 
-        isAttached = true;
+        isAttached = false;
         isInitialized = true;
+        isThrown = false;
     }
 
     public void EmphasisItems(bool sw)
@@ -213,6 +216,15 @@ public class ItemGimmick : MonoBehaviour {
     public void SetAttach(bool isChecked)
     {
         isAttached = isChecked;
+        
+    }
+    public bool GetThrown()
+    {
+        return IsThrown;
+    }
+    public void SetThrown(bool isChecked)
+    {
+        isThrown = isChecked;
         
     }
 
