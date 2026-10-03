@@ -16,7 +16,7 @@ public class EnemyController : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         ItemGimmick item = collision.gameObject.GetComponent<ItemGimmick>();
-        if(collision.gameObject.CompareTag("Item") && item.GetThrown())
+        if(collision.gameObject.CompareTag("Item") &&(item.GetThrown() || item.IsAttached) )
         {   
             int id = item.Id;
             int playerDamage = db.GetAttackById(id);
@@ -31,8 +31,11 @@ public class EnemyController : MonoBehaviour
                 enemyHp -= playerDamage;
                 Debug.Log("HPを"+playerDamage+"減らしたよ");
             }
+            if (item.GetThrown())
+            {
+                Destroy(collision.gameObject);
+            }
             
-            Destroy(collision.gameObject);
         }
     }
     public void SetEnemyHp(int damage)

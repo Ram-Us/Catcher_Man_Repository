@@ -96,7 +96,7 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
             
             case EnemyState.Idle:
                 currentSpeed = 0;
-                Debug.Log("今"+currentDistance+"に対して、アイドルは"+idleDistance);
+                //Debug.Log("今"+currentDistance+"に対して、アイドルは"+idleDistance);
 
                 break;
             case EnemyState.Chase:
@@ -107,7 +107,7 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
                 velocity.x = 0;
                 rb.linearVelocity = velocity;
                 Debug.Log(direction);
-                Debug.Log("今"+currentSpeed+"で"+battleDistance+"になるまで走行中");
+                //Debug.Log("今"+currentSpeed+"で"+battleDistance+"になるまで走行中");
                 break;
 
             case EnemyState.Shoot:

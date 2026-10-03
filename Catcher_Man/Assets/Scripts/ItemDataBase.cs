@@ -53,6 +53,10 @@ public class Item
 
     [SerializeField] private Vector3 equippedItemScale;
     public Vector3 EquippedItemScale => equippedItemScale;
+    [SerializeField] private Vector3 equippedColliderSize; //オブジェクトのコライダーのサイズ
+    public Vector3 EquippedColliderSize => equippedColliderSize;
+    [SerializeField] private Vector3 equippedColliderCenter; //オブジェクトのコライダーのサイズ
+    public Vector3 EquippedColliderCenter => equippedColliderCenter;
 
     [SerializeField] private int[] rect;
     public int[] Rect => rect;
@@ -190,6 +194,29 @@ public class ItemDataBase : ScriptableObject
         }
         return new Vector3(0f,0f,0f);
     }
+    public Vector3 GetEquippedColliderSizeById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.EquippedColliderSize;
+            }
+        }
+        return new Vector3(0f,0f,0f);
+    }
+    public Vector3 GetEquippedColliderCenterById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.EquippedColliderCenter;
+            }
+        }
+        return new Vector3(0f,0f,0f);
+    }
+
     public int GetWidthById(int id)
     {
         foreach (var item in items)

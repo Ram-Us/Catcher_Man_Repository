@@ -19,7 +19,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
     [SerializeField] private int chaseSpeed;
     private int currentSpeed;
     private Rigidbody rb;
-    [SerializeField] private bool isGrounded = false,isColided = false;
+    [SerializeField] private bool isGrounded = false,isColided = false,ShooterType = false;
     private bool leapRequested = false;
 
     void Awake()
@@ -81,28 +81,21 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
             case EnemyState.Cooldown:
                 if (isGrounded)
                 {
-                    if (isColided)
+                    //Debug.Log("クールダウン"+currentTimer);
+                    currentTimer -= Time.deltaTime;
+                    if(currentTimer <= 0f)
                     {
-                        //Debug.Log("クールダウン"+currentTimer);
-                        currentTimer -= Time.deltaTime;
-                        if(currentTimer <= 0f)
+                        if(currentDistance > idleDistance)
                         {
-                            if(currentDistance > idleDistance)
-                            {
-                                //Debug.Log("アイドルへ");
-                                currentState = EnemyState.Idle;
-                            }
-                            else
-                            {
-                                currentState = EnemyState.Chase;
-                            }
-                            currentTimer = coolDownTimer;
-                            
+                            //Debug.Log("アイドルへ");
+                            currentState = EnemyState.Idle;
                         }
-                    }
-                    else
-                    {
-                        currentState = EnemyState.Chase;
+                        else
+                        {
+                            currentState = EnemyState.Chase;
+                        }
+                        currentTimer = coolDownTimer;
+                        
                     }
                     
                 }
@@ -133,7 +126,18 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
                 break;
 
             case EnemyState.Leap:
-
+                if (ShooterType)
+                {
+                    ShootEnemyContorller shooter = GetComponent<ShootEnemyContorller>();
+                    if (shooter != null && shooter.TryShoot())
+                    {
+                        currentState = EnemyState.Cooldown;
+                    }
+                    else if (currentDistance > battleDistance)
+                    {
+                        currentState = EnemyState.Chase;
+                    }
+                }
                 if (leapRequested)
                 {
                     direction = Mathf.Sign(player.position.z - transform.position.z);

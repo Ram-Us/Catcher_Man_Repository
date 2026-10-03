@@ -173,16 +173,22 @@ public class ItemGimmick : MonoBehaviour {
     }
     private void OnCollisionEnter(Collision collision)
     {
-       /* if(collision.gameObject.CompareTag("Item"))
+        /*if(collision.gameObject.CompareTag("Item"))
         {
             Debug.Log("アイテムに触れた");
-            Destroy(this.gameObject);
+            Destroy(collision.gameObject);
         }*/
         if(collision.gameObject.CompareTag("Ground"))
         {
             Rigidbody rb = GetComponent<Rigidbody>();
             rb.constraints |= RigidbodyConstraints.FreezePositionY;
             rb.isKinematic = true;
+        }
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            int damage = db.GetAttackById(Id);
+            collision.gameObject.GetComponent<EnemyController>().SetEnemyHp(damage);
+            Debug.Log("敵に"+damage+"ダメージ");
         }
         
     }
@@ -229,4 +235,6 @@ public class ItemGimmick : MonoBehaviour {
     }
 
     
+
+
 }
