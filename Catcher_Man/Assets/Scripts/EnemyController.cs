@@ -21,7 +21,7 @@ public class EnemyController : MonoBehaviour
             int id = item.Id;
             int playerDamage = db.GetAttackById(id);
             Debug.Log(enemyHp +"<"+ playerDamage);
-            if(enemyHp < playerDamage)
+            if(enemyHp <= playerDamage)
             {
                 Destroy(this.gameObject);
                 Debug.Log("敵撃破");

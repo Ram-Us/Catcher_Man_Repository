@@ -184,12 +184,12 @@ public class ItemGimmick : MonoBehaviour {
             rb.constraints |= RigidbodyConstraints.FreezePositionY;
             rb.isKinematic = true;
         }
-        if (collision.gameObject.CompareTag("Enemy"))
+        /*if (collision.gameObject.CompareTag("Enemy"))
         {
             int damage = db.GetAttackById(Id);
             collision.gameObject.GetComponent<EnemyController>().SetEnemyHp(damage);
             Debug.Log("敵に"+damage+"ダメージ");
-        }
+        }*/
         
     }
     
