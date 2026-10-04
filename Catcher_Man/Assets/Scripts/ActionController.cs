@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
-
-
 public class ActionController : MonoBehaviour
 {
     private InputAction catchAction,putAction,selectAction,throwAction,swingAction;
@@ -14,7 +12,6 @@ public class ActionController : MonoBehaviour
     public int SelectNumber => selectNumber;
     [SerializeField]float shootSpeed = 5f;
     [Min(0f)] private float equippedItemScale;
-
     [SerializeField]private List<int> getItems = new();
     [SerializeField] private GameObject shootPoint,weapon;
     private GameObject weaponObject;
@@ -26,7 +23,6 @@ public class ActionController : MonoBehaviour
             {
                 return false;
             }
-
             ItemGimmick equippedItem = weaponObject.GetComponent<ItemGimmick>();
             return equippedItem != null && equippedItem.IsAttached &&
                    dataBase.GetItemTypeById(equippedItem.Id) == ItemType.Ladder;
@@ -34,10 +30,10 @@ public class ActionController : MonoBehaviour
     }
     private Animator weaponAnimator;
     private Animator playerAnimator;
+    private WeaponColliderController weaponColliderController;
     SpriteRenderer PresentWeaponVisual;
     Sprite choicedWeaponVisual;
     [SerializeField] ItemDataBase dataBase;
-    
     private void Awake()
     {
         catchAction = InputSystem.actions.FindAction("Catch");
@@ -46,15 +42,19 @@ public class ActionController : MonoBehaviour
         throwAction = InputSystem.actions.FindAction("Throw");
         swingAction = InputSystem.actions.FindAction("Swing");
         playerAnimator = GetComponent<Animator>();
+        weaponColliderController = GetComponent<WeaponColliderController>();
+        // PlayerではなくWeaponPivot側に付けた場合にも対応する。
+        if (weaponColliderController == null && weapon != null)
+        {
+            weaponColliderController = weapon.GetComponent<WeaponColliderController>();
+        }
     }
-
     private void OnEnable() {
         catchAction.started += OnCatch;
         putAction.started += OnPut;
         selectAction.started += OnSelect;
         throwAction.started += OnThrow;
         swingAction.started += OnSwing;
-        
     }
     private void OnDisable()
     {
@@ -64,8 +64,6 @@ public class ActionController : MonoBehaviour
         throwAction.started -= OnThrow;
         swingAction.started -= OnSwing;
     }
-
-
     private void OnCatch(InputAction.CallbackContext context)
     {
         if (isTouched)
@@ -90,7 +88,6 @@ public class ActionController : MonoBehaviour
                         break;
                     }
                 }
-
             }
             else
             {
@@ -122,11 +119,10 @@ public class ActionController : MonoBehaviour
             return;
         }
         rGb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
+        rGb.transform.localEulerAngles = new Vector3(0f,90f,0f);
         itemGimmick.Initialize(getItems[selectNumber]);
         itemGimmick.SetAttach(false);
         //rGb.transform.rotation = this.transform.rotation * Quaternion.Euler(0f,180f,0f);
-        
-        
         rGb.SetActive(true);
         if (sc.StockCount[selectNumber] <= 1)
         {
@@ -144,10 +140,8 @@ public class ActionController : MonoBehaviour
     {
         // スロットを1つ進める
         selectNumber = (selectNumber + 1) % 4;
-
         // 選択中の枠を移動する
         sc.MoveFrame(selectNumber);
-
         // 選択中のアイテムIDを見て、武器を切り替える
         ShowWeaponForSelectedSlot();
     }
@@ -168,7 +162,6 @@ public class ActionController : MonoBehaviour
         //rgb.transform.rotation = this.transform.rotation* Quaternion.Euler(0f,180f,0f);
         //rgb.transform.rotation = this.transform.rotation* Quaternion.Euler(0f,180f,0f);
         //rgb.GetComponent<ItemGimmick>().Initialize(rgb,getItems[selectNumber]);
-        
         rgb.SetActive(true);
         Rigidbody rg = rgb.GetComponent<Rigidbody>();
         //rg.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition;
@@ -177,8 +170,6 @@ public class ActionController : MonoBehaviour
             rg.useGravity = false;
         }
         rg.AddForce(-this.transform.right * dataBase.GetSpeedById(getItems[selectNumber]), ForceMode.Impulse);
-
-
         if ((int)dataBase.GetItemTypeById(getItems[selectNumber]) == 5)
         {
             rgb.GetComponent<ItemGimmick>().SetThrown(true);
@@ -187,7 +178,6 @@ public class ActionController : MonoBehaviour
             Debug.Log("ぎああああ");
             //weaponAnimator.SetTrigger("Gear");
         }
-        
         if (sc.StockCount[selectNumber] <= 1)
         {
             sc.DeleteUI(selectNumber);
@@ -198,11 +188,7 @@ public class ActionController : MonoBehaviour
             ShowWeaponForSelectedSlot();
         }
         sc.SubStock(selectNumber);
-        
-        
-        
         //Destroy(rgb,5f);
-
     }
     private void OnSwing(InputAction.CallbackContext context)
     {
@@ -211,47 +197,48 @@ public class ActionController : MonoBehaviour
         {
             ShowWeaponForSelectedSlot();
             Debug.Log("武器を出した");
-            return;
+            // 装備に失敗した場合だけ中断する。成功時は同じ入力でそのまま振る。
+            if (!weapon.activeSelf)
+            {
+                return;
+            }
         }
-
-        // 振る武器のAnimatorを取得
-        
-         weaponAnimator = weaponObject.GetComponentInChildren<Animator>();
-        
-
-        if (weaponAnimator == null)
-        {
-            Debug.LogWarning("武器のAnimatorが見つかりません。");
-            return;
-        }
-
         // アイテムの種類でトリガーを変える
         int selectedItemId = GetSelectedItemId();
+        if (selectedItemId <= 0)
+        {
+            return;
+        }
         if (selectedItemId > 0 && (int)dataBase.GetItemTypeById(selectedItemId) == 4)
         {
+            if (weaponAnimator == null)
+            {
+                Debug.LogWarning("鉄球のAnimatorが見つかりません。");
+                return;
+            }
             weaponAnimator.SetTrigger("IronBall");
         }
         else
         {
-            weaponAnimator.SetTrigger("Weapon");
+            if (weaponColliderController == null)
+            {
+                Debug.LogWarning("WeaponColliderControllerが見つかりません。");
+                return;
+            }
+            weaponColliderController.SwingWeapon();
         }
-
         Debug.Log("武器を振った");
     }
-    
-
     private void OnCollisionStay(Collision other) {
         if (other.gameObject.CompareTag("Item"))
         {
             isTouched = true;
             gb = other.gameObject;
             //Debug.Log("触れてるよ");
-
         }
         else
         {
             isTouched = false;
-
         }
     }
     private int GetSelectedItemId()
@@ -261,10 +248,8 @@ public class ActionController : MonoBehaviour
         {
             return 0;
         }
-
         return getItems[selectNumber];
     }
-
     private void ShowWeaponForSelectedSlot()
     {
         if (weapon == null)
@@ -272,16 +257,20 @@ public class ActionController : MonoBehaviour
             Debug.LogWarning("Weaponがまだ設定されていません。");
             return;
         }
-
+        if (weaponColliderController != null)
+        {
+            weaponColliderController.StopSwing();
+        }
         // 前の武器を消す
         for (int i = weapon.transform.childCount - 1; i >= 0; i--)
-        {   
-
+        {
             Destroy(weapon.transform.GetChild(i).gameObject);
         }
-
         int selectedItemId = GetSelectedItemId();
-
+        // ID6だけ140度。それ以外へ切り替えたときは必ず0度へ戻す。
+        weapon.transform.localRotation = selectedItemId == 6
+            ? Quaternion.Euler(0f, 0f, 140f)
+            : Quaternion.identity;
         // 空のスロットなら武器を隠す
         if (selectedItemId <= 0)
         {
@@ -290,7 +279,6 @@ public class ActionController : MonoBehaviour
             weapon.SetActive(false);
             return;
         }
-
         // アイテムIDからPrefabを探す
         GameObject weaponPrefab = dataBase.GetIntanceById(selectedItemId);
         if (weaponPrefab == null)
@@ -301,27 +289,21 @@ public class ActionController : MonoBehaviour
             weapon.SetActive(false);
             return;
         }
-
         // 武器を生成して、weaponの子にする
         weaponObject = Instantiate(weaponPrefab);
         weaponObject.transform.SetParent(weapon.transform, false);
         weaponObject.transform.localPosition = new Vector3(0f, 0f, 0f);
         weaponObject.SetActive(false);
-
         // 生成した武器の見た目とAnimatorを初期化する
         ItemGimmick weaponItem = weaponObject.GetComponent<ItemGimmick>();
         if (weaponItem != null)
         {
             weaponItem.InitializeForWeapon(selectedItemId);
         }
-
-        // 持っている間はCollider同士がぶつからないようにする
-        Collider[] weaponColliders = weaponObject.GetComponentsInChildren<Collider>(true);
-        foreach (Collider weaponCollider in weaponColliders)
+        if (weaponItem != null)
         {
-            weaponCollider.enabled = false;
+            weaponItem.SetAttach(true);
         }
-
         Rigidbody weaponRigidbody = weaponObject.GetComponent<Rigidbody>();
         if (weaponRigidbody != null)
         {
@@ -330,49 +312,47 @@ public class ActionController : MonoBehaviour
             weaponRigidbody.linearVelocity = Vector3.zero;
             weaponRigidbody.angularVelocity = Vector3.zero;
         }
-
         weaponObject.SetActive(true);
         weapon.SetActive(true);
-
+        Debug.Log((int)dataBase.GetItemTypeById(selectedItemId));
         weaponAnimator = weaponObject.GetComponentInChildren<Animator>(true);
-
         if (weaponAnimator != null)
         {
             weaponAnimator.enabled = true;
             weaponAnimator.Rebind();
             weaponAnimator.Update(0f);
         }
-
+        //weaponRigidbody.constraints &= ~RigidbodyConstraints.FreezeRotationZ;
         weaponObject.transform.localPosition = new Vector3(0f, 0f, 0f);
-        weaponObject.transform.localRotation = Quaternion.identity;
+        weaponObject.transform.localPosition = new Vector3(0f, 0f, 0f);
         weaponObject.transform.localScale = dataBase.GetEquippedItemScaleById(getItems[selectNumber]);
-
+        BoxCollider cl = weaponObject.GetComponent<BoxCollider>();
+        cl.center = dataBase.GetEquippedColliderCenterById(getItems[selectNumber]);
+        cl.size = dataBase.GetEquippedColliderSizeById(getItems[selectNumber]);
         Debug.Log("武器を表示: ID = " + selectedItemId);
+        if (weaponColliderController != null)
+        {
+            weaponColliderController.SwingInitialize(weapon.transform);
+        }
     }
-        
-    
     private void SetItem(GameObject gb, int i, bool isexisted)
-{
-    if (!isexisted)
     {
-        sc.RefreshUI(gb);
+        if (!isexisted)
+        {
+            sc.RefreshUI(gb);
+        }
+        ic.DeleteSearchedItem(gb);
+        MoveController moveController = GetComponent<MoveController>();
+        if (moveController != null)
+        {
+            moveController.ForgetWorldItem(gb);
+        }
+        Destroy(gb);
+        isTouched = false;
+        this.gb = null;
+        sc.AddStock(i);
+        selectNumber = i;
+        sc.MoveFrame(selectNumber);
+        ShowWeaponForSelectedSlot();
     }
-
-    ic.DeleteSearchedItem(gb);
-    MoveController moveController = GetComponent<MoveController>();
-    if (moveController != null)
-    {
-        moveController.ForgetWorldItem(gb);
-    }
-    Destroy(gb);
-    isTouched = false;
-    this.gb = null;
-
-    sc.AddStock(i);
-
-    selectNumber = i;
-    sc.MoveFrame(selectNumber);
-    ShowWeaponForSelectedSlot();
-}
-    
 }

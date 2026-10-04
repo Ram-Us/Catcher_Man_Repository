@@ -31,6 +31,12 @@ public class MoveController : MonoBehaviour
         actionController = GetComponent<ActionController>();
         moveAction = InputSystem.actions.FindAction("Move");
         jumpAction = InputSystem.actions.FindAction("Jump");
+        jumpRequested = false;
+        jumpHeld = false;
+        wasClimbing = false;
+        jumpConsumed = false;
+        isGround = false;
+        isTouchingLadder = false;
     }
 
     private void OnEnable()
@@ -47,14 +53,10 @@ public class MoveController : MonoBehaviour
         moveAction.canceled -= OnMoveCanceled;
         jumpAction.started -= OnJump;
         jumpAction.canceled -= OnJumpCanceled;
-        jumpRequested = false;
-        jumpHeld = false;
-        wasClimbing = false;
-        jumpConsumed = false;
+        
         supportContacts.Clear();
         ladderContacts.Clear();
-        isGround = false;
-        isTouchingLadder = false;
+        
     }
 
     private void FixedUpdate()
