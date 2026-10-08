@@ -57,12 +57,12 @@ MonoBehaviour:
     speed: 8
     attack: 5
     colliderSize: {x: 0.3, y: 0.3, z: 0.3}
-    colliderCenterSize: {x: -0.17, y: 0, z: 0}
+    colliderCenterSize: {x: 0, y: 0, z: 0}
     instance: {fileID: 4341995269951199168, guid: 5a5b952d673768e4bbe4bb2b9f7f1382, type: 3}
     rotated: 0
     equippedItemScale: {x: 1, y: 0.2, z: 0.2}
     equippedColliderSize: {x: 0.3, y: 0.4, z: 0.3}
-    equippedColliderCenter: {x: 0, y: 0, z: 0}
+    equippedColliderCenter: {x: -0.17, y: 0, z: 0}
     rect: 6400000064000000
   - id: 4
     icon: {fileID: 21300028, guid: 7810966f0f690954c87305933cabf2b0, type: 3}

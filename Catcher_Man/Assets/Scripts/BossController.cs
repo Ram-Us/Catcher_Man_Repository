@@ -18,14 +18,15 @@ public class BossController : MonoBehaviour,IEnemyProvider
     private EnemyController enemyData;
     private ShootEnemyContorller shooter;
     [SerializeField] private EnemyState currentState,previousState;
-    [SerializeField] private float idleDistance,moveDistance,meleeDistance,rangedDistance,jumpPower,coolDownTimer,lerpTime;
-    private float currentDistance,currentTimer;
+    [SerializeField] private float idleDistance,moveDistance,meleeDistance,rangedDistance,jumpPower,coolDownTimer,lerpTime,specialInterval,specialTimer;
+    private float currentDistance,currentTimer,direction;
     [SerializeField] private Transform player;
     [SerializeField] private int moveSpeed;
-    private int currentSpeed,random;
+    private int currentSpeed;
+    [SerializeField] private int random;
     private Rigidbody rb;
-    private Animator anim;
-    [SerializeField] private bool isGrounded = false,isColided = false,isShoot = false;
+    [SerializeField]private Animator anim;
+    [SerializeField] private bool isGrounded = false,isColided = false,isShoot = false,isSpeciealized = true,isStopped;
     private Vector3 leftRotation = new Vector3(0f,180f,0f),rightRotation = new Vector3(0f,0f,0f);
 
     void Awake()
@@ -35,24 +36,86 @@ public class BossController : MonoBehaviour,IEnemyProvider
         currentState = EnemyState.Idle;
         rb = GetComponent<Rigidbody>();
         currentTimer = coolDownTimer;
-        anim = GetComponent<Animator>();
+        specialTimer = specialInterval;
+        if (!HasBossParameters(anim))
+        {
+            anim = null;
+            foreach (Animator childAnimator in GetComponentsInChildren<Animator>(true))
+            {
+                if (HasBossParameters(childAnimator))
+                {
+                    anim = childAnimator;
+                    break;
+                }
+            }
+        }
+
+        if (anim == null)
+        {
+            Debug.LogError(
+                "BossController could not find an enabled child Animator with the boss controller parameters (Idle, Run, Attack, Special). Check the Animator's Controller and rig hierarchy.",
+                this);
+            enabled = false;
+            return;
+        }
+        
     }
+
+    private static bool HasBossParameters(Animator animator)
+    {
+        if (animator == null ||
+            !animator.enabled ||
+            !animator.gameObject.activeInHierarchy ||
+            animator.runtimeAnimatorController == null)
+        {
+            return false;
+        }
+
+        bool hasIdle = false;
+        bool hasRun = false;
+        bool hasAttack = false;
+        bool hasSpecial = false;
+        foreach (AnimatorControllerParameter parameter in animator.parameters)
+        {
+            if (parameter.type != AnimatorControllerParameterType.Trigger)
+            {
+                continue;
+            }
+
+            hasIdle |= parameter.name == "Idle";
+            hasRun |= parameter.name == "Run";
+            hasAttack |= parameter.name == "Attack";
+            hasSpecial |= parameter.name == "Special";
+        }
+
+        return hasIdle && hasRun && hasAttack && hasSpecial;
+    }
+
     void Update()
     {
+        specialTimer -= Time.deltaTime;
+        if(specialTimer <= 0f)
+        {
+            Debug.Log("必殺技発動");
+            currentState = EnemyState.DepthAttack;
+            specialTimer = specialInterval;
+        }
         currentDistance = GetDistancePlayer();
+        
+
         
         switch (currentState)
         {
             case EnemyState.Idle:
 
                 // プレイヤーが行動範囲へ入ったら距離に応じて行動する
-                if (currentDistance <= meleeDistance)
-                {
-                    currentState = EnemyState.MeleeAttack;
-                }
-                else if (currentDistance < moveDistance)
+                 if (currentDistance < moveDistance)
                 {
                     currentState = EnemyState.Move;
+                }
+                else if (currentDistance <= meleeDistance)
+                {
+                    currentState = EnemyState.MeleeAttack;
                 }
                 else if (currentDistance <= rangedDistance &&
                         shooter != null)
@@ -116,18 +179,7 @@ public class BossController : MonoBehaviour,IEnemyProvider
                     !anim.IsInTransition(0) &&
                     stateInfo.normalizedTime >= 0.95f)
                 {
-                    random--;
-
-                    if (random <= 0)
-                    {
-                        // MoveのFixedUpdateが実行されるまで再射撃を防ぐ
-                        currentState = EnemyState.Move;
-                    }
-                    else
-                    {
-                        // 次の射撃を許可
-                        isShoot = false;
-                    }
+                    currentState = EnemyState.Move;
                 }
 
                 break;
@@ -164,13 +216,15 @@ public class BossController : MonoBehaviour,IEnemyProvider
 
     void FixedUpdate()
     {
-        Debug.Log(currentDistance);
+        direction = Math.Sign(player.position.z - transform.position.z);
+        //Debug.Log(direction);
         switch (currentState)
         {
             
             case EnemyState.Idle:
 
                 StopMovement();
+                PlayerDirection();
 
                 // Idleへ入ったときだけTriggerを呼ぶ
                 if (previousState != EnemyState.Idle)
@@ -183,6 +237,7 @@ public class BossController : MonoBehaviour,IEnemyProvider
 
             case EnemyState.Move:
             {
+                PlayerDirection();
                 // Moveへ入ったときだけTriggerを呼ぶ
                 if (previousState != EnemyState.Move)
                 {
@@ -193,32 +248,19 @@ public class BossController : MonoBehaviour,IEnemyProvider
 
                 currentSpeed = moveSpeed;
 
-                float direction =
-                    Math.Sign(player.position.z - transform.position.z);
-
-                // 移動方向に応じた目標角度
-                Quaternion targetRotation =
-                    direction < 0f
-                        ? Quaternion.Euler(leftRotation)
-                        : Quaternion.Euler(rightRotation);
-
-                // Y軸方向を滑らかに反転
-                transform.localRotation = Quaternion.Slerp(
-                    transform.localRotation,
-                    targetRotation,
-                    Mathf.Clamp01(lerpTime * Time.fixedDeltaTime)
-                );
+                
 
                 Vector3 velocity = rb.linearVelocity;
                 velocity.x = 0f;
                 velocity.z = direction * currentSpeed;
                 rb.linearVelocity = velocity;
+                
 
                 break;
             }
 
             case EnemyState.MeleeAttack:
-
+                PlayerDirection();
                 // 攻撃開始前に停止
                 StopMovement();
 
@@ -232,7 +274,7 @@ public class BossController : MonoBehaviour,IEnemyProvider
                 break;
 
             case EnemyState.RangedAttack:
-
+                PlayerDirection();
                 StopMovement();
 
                 // RangedAttackへ入った瞬間にだけ射撃回数を決める
@@ -252,25 +294,37 @@ public class BossController : MonoBehaviour,IEnemyProvider
                     shooter != null &&
                     !shooter.IsCoolingDown)
                 {
-                    if (shooter.TryShoot())
+                    /*if (shooter.TryShoot())
                     {
                         // 同じShootステートを先頭から再生する
                         anim.Play("Shoot", 0, 0f);
                         isShoot = true;
+                    }*/
+                    for(int i = 0;i < random; i++)
+                    {
+                        
+                        shooter.TryShoot();
+                        if (i == 0)
+                        {
+                            anim.Play("Shoot", 0, 0f);
+                            isShoot = true;
+                        }
                     }
                 }
 
                 break;
 
             case EnemyState.DepthAttack:
-
                 StopMovement();
+                PlayerDirection();
+                anim.SetTrigger("Special");
+                currentState = EnemyState.Idle;
                 break;
 
             case EnemyState.CoolDown:
 
                 StopMovement();
-
+                PlayerDirection();
                 // previousStateは変更しない
                 // 直前がMeleeかRangedかを保持するため
                 break;
@@ -294,6 +348,22 @@ public class BossController : MonoBehaviour,IEnemyProvider
         velocity.x = 0f;
         velocity.z = 0f;
         rb.linearVelocity = velocity;
+    }
+    private void PlayerDirection()
+    {
+        // 移動方向に応じた目標角度
+        Quaternion targetRotation =
+            direction < 0f
+                ? Quaternion.Euler(leftRotation)
+                : Quaternion.Euler(rightRotation);
+
+        // Y軸方向を滑らかに反転
+        transform.localRotation = Quaternion.Slerp(
+            transform.localRotation,
+            targetRotation,
+            Mathf.Clamp01(lerpTime * Time.fixedDeltaTime)
+        );
+        Debug.Log(transform.localEulerAngles);
     }
 
     private void OnCollisionEnter(Collision collision)
