@@ -18,6 +18,7 @@ public class MoveController : MonoBehaviour
     private readonly HashSet<Collider> ladderContacts = new();
 
     private float moveInput;
+    public float MoveInput => moveInput;
     private bool jumpRequested;
     private bool jumpHeld;
     private bool jumpConsumed;

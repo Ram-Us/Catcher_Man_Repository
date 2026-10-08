@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
+using JetBrains.Annotations;
 public class ActionController : MonoBehaviour
 {
     private InputAction catchAction,putAction,selectAction,throwAction,swingAction;
@@ -11,7 +13,7 @@ public class ActionController : MonoBehaviour
     private int selectNumber,id = 0;
     public int SelectNumber => selectNumber;
     [SerializeField]float shootSpeed = 5f;
-    [Min(0f)] private float equippedItemScale;
+    private float equippedItemScale,beforeMoveDirection,moveDirection,weaponPositionX,weaponRotationZ;
     [SerializeField]private List<int> getItems = new();
     [SerializeField] private GameObject shootPoint,weapon;
     private GameObject weaponObject;
@@ -48,6 +50,8 @@ public class ActionController : MonoBehaviour
         {
             weaponColliderController = weapon.GetComponent<WeaponColliderController>();
         }
+        beforeMoveDirection = gameObject.GetComponent<MoveController>().MoveInput;
+        weaponPositionX = weapon.transform.localPosition.x;
     }
     private void OnEnable() {
         catchAction.started += OnCatch;
@@ -63,6 +67,23 @@ public class ActionController : MonoBehaviour
         selectAction.started -= OnSelect;
         throwAction.started -= OnThrow;
         swingAction.started -= OnSwing;
+    }
+    void FixedUpdate()
+    {
+        moveDirection = gameObject.GetComponent<MoveController>().MoveInput;
+        //Debug.Log(beforeMoveDirection +"==" +moveDirection);
+        if(moveDirection != 0 && beforeMoveDirection != moveDirection)
+        {
+            beforeMoveDirection = moveDirection;
+            WeaponDirection(moveDirection);
+            
+            
+        }
+        
+            
+
+            
+        
     }
     private void OnCatch(InputAction.CallbackContext context)
     {
@@ -118,7 +139,15 @@ public class ActionController : MonoBehaviour
             Destroy(rGb);
             return;
         }
-        rGb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
+        rGb.transform.position = weapon.transform.position;
+        if(beforeMoveDirection == 1)
+        {
+            rGb.transform.position += new Vector3(0f,0f,1f);
+        }else if(beforeMoveDirection == -1)
+        {
+            rGb.transform.position += new Vector3(0f,0f,-1f);
+        }
+        //rGb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
         rGb.transform.localEulerAngles = new Vector3(0f,90f,0f);
         itemGimmick.Initialize(getItems[selectNumber]);
         itemGimmick.SetAttach(false);
@@ -134,7 +163,7 @@ public class ActionController : MonoBehaviour
             ShowWeaponForSelectedSlot();
         }
         sc.SubStock(selectNumber);
-        Debug.Log(selectNumber+"番目のオブジェクトを設置！");
+        //Debug.Log(selectNumber+"番目のオブジェクトを設置！");
     }
     private void OnSelect(InputAction.CallbackContext context)
     {
@@ -147,48 +176,102 @@ public class ActionController : MonoBehaviour
     }
     private void OnThrow(InputAction.CallbackContext context)
     {
-        weapon.SetActive(false);
-        GameObject rgb = Instantiate(dataBase.GetIntanceById(getItems[selectNumber]));
-        ItemGimmick itemGimmick = rgb.GetComponent<ItemGimmick>();
-        if (itemGimmick == null)
-        {
-            Debug.LogError("生成したオブジェクトにItemGimmickがありません。", rgb);
-            Destroy(rgb);
-            return;
-        }
-        rgb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
-        itemGimmick.Initialize(getItems[selectNumber]);
-        itemGimmick.SetAttach(false);
-        //rgb.transform.rotation = this.transform.rotation* Quaternion.Euler(0f,180f,0f);
-        //rgb.transform.rotation = this.transform.rotation* Quaternion.Euler(0f,180f,0f);
-        //rgb.GetComponent<ItemGimmick>().Initialize(rgb,getItems[selectNumber]);
-        rgb.SetActive(true);
-        Rigidbody rg = rgb.GetComponent<Rigidbody>();
-        //rg.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition;
-        rg.constraints &= ~RigidbodyConstraints.FreezePositionZ;
-        if ((int)dataBase.GetItemTypeById(getItems[selectNumber] )!= 6){
-            rg.useGravity = false;
-        }
-        rg.AddForce(-this.transform.right * dataBase.GetSpeedById(getItems[selectNumber]), ForceMode.Impulse);
-        if ((int)dataBase.GetItemTypeById(getItems[selectNumber]) == 5)
-        {
-            rgb.GetComponent<ItemGimmick>().SetThrown(true);
-            rg.constraints &= ~RigidbodyConstraints.FreezeRotationZ;
-            rg.AddTorque(Vector3.right   * 5f, ForceMode.Impulse);
-            Debug.Log("ぎああああ");
-            //weaponAnimator.SetTrigger("Gear");
-        }
-        if (sc.StockCount[selectNumber] <= 1)
-        {
-            sc.DeleteUI(selectNumber);
-            getItems[selectNumber]=0;
-        }
-        else
-        {
-            ShowWeaponForSelectedSlot();
-        }
-        sc.SubStock(selectNumber);
-        //Destroy(rgb,5f);
+    int selectedItemId = getItems[selectNumber];
+
+    if (selectedItemId <= 0)
+    {
+        return;
+    }
+
+    weapon.SetActive(false);
+
+    GameObject prefab = dataBase.GetIntanceById(selectedItemId);
+    GameObject rgb = Instantiate(prefab);
+
+    ItemGimmick itemGimmick = rgb.GetComponent<ItemGimmick>();
+    Rigidbody rg = rgb.GetComponent<Rigidbody>();
+
+    if (itemGimmick == null)
+    {
+        Debug.LogError(
+            "生成したオブジェクトにItemGimmickがありません。",
+            rgb
+        );
+
+        Destroy(rgb);
+        return;
+    }
+
+    if (rg == null)
+    {
+        Debug.LogError(
+            "生成したオブジェクトにRigidbodyがありません。",
+            rgb
+        );
+
+        Destroy(rgb);
+        return;
+    }
+
+    rgb.transform.position = weapon.transform.position;
+    if(beforeMoveDirection == 1)
+    {
+        rgb.transform.position += new Vector3(0f,0f,1f);
+    }else if(beforeMoveDirection == -1)
+    {
+        rgb.transform.position += new Vector3(0f,0f,-1f);
+    }
+
+    // 角度はQuaternion.Eulerで設定する
+    rgb.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+
+    itemGimmick.Initialize(selectedItemId);
+    itemGimmick.SetAttach(false);
+    itemGimmick.SetThrown(true);
+
+    rgb.SetActive(true);
+
+    rg.isKinematic = false;
+    rg.constraints &= ~RigidbodyConstraints.FreezePositionZ;
+
+    if ((int)dataBase.GetItemTypeById(selectedItemId) != 6)
+    {
+        rg.useGravity = false;
+    }
+
+    rg.linearVelocity = Vector3.zero;
+    rg.angularVelocity = Vector3.zero;
+
+    // プレイヤーの向いている方向へ投げる
+    rg.AddForce(
+        beforeMoveDirection * -transform.right * dataBase.GetSpeedById(selectedItemId),
+        ForceMode.Impulse
+    );
+
+    // ItemTypeが5なら回転を加える
+    if ((int)dataBase.GetItemTypeById(selectedItemId) == 5)
+    {
+        // オブジェクト自身のZ回転だけを許可;
+        rg.constraints |= RigidbodyConstraints.FreezePositionY;
+        rg.constraints &= ~RigidbodyConstraints.FreezeRotationZ;
+
+
+        // angularVelocityはワールド座標なので、
+        // transform.forwardでローカルZ軸をワールド方向へ変換する
+        rg.angularVelocity = rgb.transform.forward * 20f;
+    }
+
+    if (sc.StockCount[selectNumber] <= 1)
+    {
+        sc.DeleteUI(selectNumber);
+        getItems[selectNumber] = 0;
+    }
+    else
+    {
+        ShowWeaponForSelectedSlot();
+    }
+
+    sc.SubStock(selectNumber);
     }
     private void OnSwing(InputAction.CallbackContext context)
     {
@@ -196,7 +279,7 @@ public class ActionController : MonoBehaviour
         if (!weapon.activeSelf)
         {
             ShowWeaponForSelectedSlot();
-            Debug.Log("武器を出した");
+            //Debug.Log("武器を出した");
             // 装備に失敗した場合だけ中断する。成功時は同じ入力でそのまま振る。
             if (!weapon.activeSelf)
             {
@@ -267,10 +350,11 @@ public class ActionController : MonoBehaviour
             Destroy(weapon.transform.GetChild(i).gameObject);
         }
         int selectedItemId = GetSelectedItemId();
-        // ID6だけ140度。それ以外へ切り替えたときは必ず0度へ戻す。
-        weapon.transform.localRotation = selectedItemId == 6
-            ? Quaternion.Euler(0f, 0f, 140f)
-            : Quaternion.identity;
+        // ID6だけZ軸を140度傾ける。それ以外は0度。
+        weaponRotationZ = selectedItemId == 6 ? 140f : 0f;
+        weapon.transform.localRotation = Quaternion.Euler(0f, 0f, weaponRotationZ);
+
+        Debug.Log(weaponRotationZ);
         // 空のスロットなら武器を隠す
         if (selectedItemId <= 0)
         {
@@ -292,7 +376,7 @@ public class ActionController : MonoBehaviour
         // 武器を生成して、weaponの子にする
         weaponObject = Instantiate(weaponPrefab);
         weaponObject.transform.SetParent(weapon.transform, false);
-        weaponObject.transform.localPosition = new Vector3(0f, 0f, 0f);
+        
         weaponObject.SetActive(false);
         // 生成した武器の見た目とAnimatorを初期化する
         ItemGimmick weaponItem = weaponObject.GetComponent<ItemGimmick>();
@@ -324,11 +408,11 @@ public class ActionController : MonoBehaviour
         }
         //weaponRigidbody.constraints &= ~RigidbodyConstraints.FreezeRotationZ;
         weaponObject.transform.localPosition = new Vector3(0f, 0f, 0f);
-        weaponObject.transform.localPosition = new Vector3(0f, 0f, 0f);
         weaponObject.transform.localScale = dataBase.GetEquippedItemScaleById(getItems[selectNumber]);
         BoxCollider cl = weaponObject.GetComponent<BoxCollider>();
         cl.center = dataBase.GetEquippedColliderCenterById(getItems[selectNumber]);
         cl.size = dataBase.GetEquippedColliderSizeById(getItems[selectNumber]);
+        WeaponDirection(beforeMoveDirection);
         Debug.Log("武器を表示: ID = " + selectedItemId);
         if (weaponColliderController != null)
         {
@@ -354,5 +438,33 @@ public class ActionController : MonoBehaviour
         selectNumber = i;
         sc.MoveFrame(selectNumber);
         ShowWeaponForSelectedSlot();
+    }
+    private void WeaponDirection(float moveDirection)
+    {
+        if (moveDirection == -1)
+        {
+            Debug.Log("左向き");
+            SetWeaponRotation(180f, -weaponRotationZ);
+            //Debug.Log(weapon.transform.rotation.eulerAngles);
+            Vector3 LocalPosition = weapon.transform.localPosition;
+            LocalPosition.x = -weaponPositionX;
+            weapon.transform.localPosition = LocalPosition;
+        }
+        else if (moveDirection == 1)
+        {
+            Debug.Log("右向き");
+            SetWeaponRotation(0f, weaponRotationZ);
+            //Debug.Log(weapon.transform.rotation.eulerAngles);
+            Vector3 LocalPosition = weapon.transform.localPosition;
+            LocalPosition.x = weaponPositionX;
+            weapon.transform.localPosition = LocalPosition;
+        }
+    }
+
+    private void SetWeaponRotation(float yRotation, float zRotation)
+    {
+        Quaternion faceDirection = Quaternion.Euler(0f, yRotation, 0f);
+        Quaternion tilt = Quaternion.Euler(0f, 0f, zRotation);
+        weapon.transform.localRotation = tilt * faceDirection;
     }
 }
