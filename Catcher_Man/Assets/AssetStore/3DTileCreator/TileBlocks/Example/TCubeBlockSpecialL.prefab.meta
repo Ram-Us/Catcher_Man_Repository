@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1cb22e59689ffd840bfaa4d6e3d79e63
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 396854
+  packageName: 3D Tile Painter - DEMO
+  packageVersion: 1.0
+  assetPath: Assets/3DTileCreator/TileBlocks/Example/TCubeBlockSpecialL.prefab
+  uploadId: 981696

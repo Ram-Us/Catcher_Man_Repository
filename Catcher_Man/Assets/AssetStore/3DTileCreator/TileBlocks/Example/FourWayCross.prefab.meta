@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 54c68cdee97458347807af5777f9e25b
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 396854
+  packageName: 3D Tile Painter - DEMO
+  packageVersion: 1.0
+  assetPath: Assets/3DTileCreator/TileBlocks/Example/FourWayCross.prefab
+  uploadId: 981696

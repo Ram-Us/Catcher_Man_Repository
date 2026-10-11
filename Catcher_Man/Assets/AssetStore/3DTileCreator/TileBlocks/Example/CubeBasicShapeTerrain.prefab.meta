@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 2887b3447070b71418641e6ca534b691
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 396854
+  packageName: 3D Tile Painter - DEMO
+  packageVersion: 1.0
+  assetPath: Assets/3DTileCreator/TileBlocks/Example/CubeBasicShapeTerrain.prefab
+  uploadId: 981696

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d89ec2e53deab7b44bd47e10c63fed26
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 396854
+  packageName: 3D Tile Painter - DEMO
+  packageVersion: 1.0
+  assetPath: Assets/3DTileCreator/BlockData/BlockExample.asset
+  uploadId: 981696

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 98cdfc5ad5d9454409574fd4dbbac3df
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 396854
+  packageName: 3D Tile Painter - DEMO
+  packageVersion: 1.0
+  assetPath: Assets/3DTileCreator/TileBlocks/Example/CubeRibbonSpecialTerrain.prefab
+  uploadId: 981696

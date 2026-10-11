@@ -21,13 +21,17 @@ public class BossController : MonoBehaviour,IEnemyProvider
     [SerializeField] private float idleDistance,moveDistance,meleeDistance,rangedDistance,jumpPower,coolDownTimer,lerpTime,specialInterval,specialTimer;
     private float currentDistance,currentTimer,direction;
     [SerializeField] private Transform player;
-    [SerializeField] private int moveSpeed;
+    [SerializeField] private int moveSpeed,bossAttackDamage,bossSpecialDamage;
+    public int BossAttackDamage => bossAttackDamage;
+    public int BossSpecialDamage => bossSpecialDamage;
     private int currentSpeed;
     [SerializeField] private int random;
     private Rigidbody rb;
     [SerializeField]private Animator anim;
-    [SerializeField] private bool isGrounded = false,isColided = false,isShoot = false,isSpeciealized = true,isStopped;
+    [SerializeField] private bool isGrounded = false,isColided = false,isShoot = false,isSpeciealized = true,isStopped,isSpecialStarted = false,isSpecialShot = false;
     private Vector3 leftRotation = new Vector3(0f,180f,0f),rightRotation = new Vector3(0f,0f,0f);
+    private AnimatorStateInfo stateInfo;
+    [SerializeField] private SpecialShooter sp;
 
     void Awake()
     {
@@ -37,6 +41,7 @@ public class BossController : MonoBehaviour,IEnemyProvider
         rb = GetComponent<Rigidbody>();
         currentTimer = coolDownTimer;
         specialTimer = specialInterval;
+
         if (!HasBossParameters(anim))
         {
             anim = null;
@@ -93,13 +98,7 @@ public class BossController : MonoBehaviour,IEnemyProvider
 
     void Update()
     {
-        specialTimer -= Time.deltaTime;
-        if(specialTimer <= 0f)
-        {
-            Debug.Log("必殺技発動");
-            currentState = EnemyState.DepthAttack;
-            specialTimer = specialInterval;
-        }
+        
         currentDistance = GetDistancePlayer();
         
 
@@ -153,8 +152,7 @@ public class BossController : MonoBehaviour,IEnemyProvider
             case EnemyState.MeleeAttack:
             {
 
-                AnimatorStateInfo stateInfo =
-                    anim.GetCurrentAnimatorStateInfo(0);
+                stateInfo = anim.GetCurrentAnimatorStateInfo(0);
                 // Attackアニメーションがほぼ終了したらCooldownへ移る
                 if (stateInfo.IsName("Attack") &&
                     stateInfo.normalizedTime >= 0.95f)
@@ -170,8 +168,7 @@ public class BossController : MonoBehaviour,IEnemyProvider
 
             case EnemyState.RangedAttack:
             {
-                AnimatorStateInfo stateInfo =
-                    anim.GetCurrentAnimatorStateInfo(0);
+                stateInfo = anim.GetCurrentAnimatorStateInfo(0);
 
                 // 1回分の射撃アニメーションが終了
                 if (isShoot &&
@@ -207,6 +204,28 @@ public class BossController : MonoBehaviour,IEnemyProvider
                 break;
 
             case EnemyState.DepthAttack:
+                stateInfo = anim.GetCurrentAnimatorStateInfo(0);
+                if (stateInfo.IsName("Special"))
+                {
+                    if (!isSpecialShot &&
+                        !anim.IsInTransition(0) &&
+                        stateInfo.normalizedTime >= 0.95f)
+                    {
+                        //Debug.Log("発射するぞ");
+                        sp.EnergyBallShoot();
+                        currentState = EnemyState.Idle;
+                        isSpecialShot = true;
+                        isSpecialStarted = false;
+                    }
+                }
+                else if (!isSpecialStarted)
+                {
+                    isSpecialShot = false;
+                    currentState = currentDistance > idleDistance
+                        ? EnemyState.Idle
+                        : EnemyState.Move;
+                }
+
                 break;
 
             case EnemyState.Defeat:
@@ -216,6 +235,16 @@ public class BossController : MonoBehaviour,IEnemyProvider
 
     void FixedUpdate()
     {
+        if (currentState != EnemyState.DepthAttack)
+        {
+            specialTimer -= Time.fixedDeltaTime;
+            if (specialTimer <= 0f)
+            {
+                Debug.Log("必殺技発動");
+                currentState = EnemyState.DepthAttack;
+                specialTimer = specialInterval;
+            }
+        }
         direction = Math.Sign(player.position.z - transform.position.z);
         //Debug.Log(direction);
         switch (currentState)
@@ -232,6 +261,7 @@ public class BossController : MonoBehaviour,IEnemyProvider
                     anim.SetTrigger("Idle");
                     previousState = EnemyState.Idle;
                 }
+                
 
                 break;
 
@@ -315,10 +345,19 @@ public class BossController : MonoBehaviour,IEnemyProvider
                 break;
 
             case EnemyState.DepthAttack:
-                StopMovement();
-                PlayerDirection();
-                anim.SetTrigger("Special");
-                currentState = EnemyState.Idle;
+            if(previousState != EnemyState.DepthAttack)
+                {
+                    StopMovement();
+                    //PlayerDirection();
+                    anim.SetTrigger("Special");
+                    previousState = EnemyState.DepthAttack;
+                    Debug.Log("準備するぞ");
+                    isSpecialStarted = true;
+                    isSpecialShot = false;
+                    sp.EnergyBallCharge();
+                    Debug.Log(direction+"のほうを向いてるよ");
+                }
+                
                 break;
 
             case EnemyState.CoolDown:
@@ -332,6 +371,7 @@ public class BossController : MonoBehaviour,IEnemyProvider
             case EnemyState.Defeat:
 
                 StopMovement();
+                sp.EnergyBallDestroy();
                 break;
         }
     }
@@ -363,14 +403,15 @@ public class BossController : MonoBehaviour,IEnemyProvider
             targetRotation,
             Mathf.Clamp01(lerpTime * Time.fixedDeltaTime)
         );
-        Debug.Log(transform.localEulerAngles);
+        //Debug.Log(transform.localEulerAngles);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
+        //rb.isKinematic = true;
         if (collision.gameObject.CompareTag("Player"))
         {
-            int damage = this.gameObject.GetComponent<EnemyController>().EnemyAttackDamage;
+            int damage = BossAttackDamage;
             collision.gameObject.GetComponent<PlayerManager>().SetPlayerHp(damage);
             isColided = true;
         }
@@ -380,7 +421,8 @@ public class BossController : MonoBehaviour,IEnemyProvider
         }
     }
     private void OnCollisionExit(Collision collision) {
-        
+
+        //rb.isKinematic = false;
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = false;

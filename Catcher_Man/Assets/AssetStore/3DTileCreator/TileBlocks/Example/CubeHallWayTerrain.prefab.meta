@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 73055cab864cefb4ab3e808ee145ea6a
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 396854
+  packageName: 3D Tile Painter - DEMO
+  packageVersion: 1.0
+  assetPath: Assets/3DTileCreator/TileBlocks/Example/CubeHallWayTerrain.prefab
+  uploadId: 981696
