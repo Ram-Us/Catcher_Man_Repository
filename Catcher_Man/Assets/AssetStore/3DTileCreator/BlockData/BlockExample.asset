@@ -1,0 +1,129 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da114627b9007cd44a3acf7285bc6fdd, type: 3}
+  m_Name: BlockExample
+  m_EditorClassIdentifier: 
+  blockData:
+    name: GrassBlock
+    block0Conn:
+      prefab: {fileID: 4990522960725443214, guid: a76515b18caf4474884941a28b498236,
+        type: 3}
+      rotationOffset: 0
+    block1Conn:
+      prefab: {fileID: 2200704005264332708, guid: e3870d665d01025479f9cbf3439936b7,
+        type: 3}
+      rotationOffset: 90
+    block2ConnStraight:
+      prefab: {fileID: 2349136282979572619, guid: 7b3e5ae35eaf3d74b8ba001e34cd8337,
+        type: 3}
+      rotationOffset: 90
+    block2ConnCornerThin:
+      prefab: {fileID: 22603876974269485, guid: 7b68e121372f7c94c9da4530cd1c8be3,
+        type: 3}
+      rotationOffset: 0
+    block3ConnT:
+      prefab: {fileID: 1209868374423361040, guid: 22f06f3e47ff69e4688388b9a77f24db,
+        type: 3}
+      rotationOffset: 90
+    block4Conn:
+      prefab: {fileID: 6160719052270363804, guid: 54c68cdee97458347807af5777f9e25b,
+        type: 3}
+      rotationOffset: 0
+    block4ConnSpecialFourWay:
+      prefab: {fileID: 8223940245806836118, guid: 487d54be6b0d4f2478310b1bb86ba4f6,
+        type: 3}
+      rotationOffset: 0
+    block3ConnTSpecialR:
+      prefab: {fileID: 6694911155265292238, guid: 63086fa195e0bf54d88622f6b2271872,
+        type: 3}
+      rotationOffset: 180
+    block3ConnTSpecialL:
+      prefab: {fileID: 6631913914237199709, guid: 1cb22e59689ffd840bfaa4d6e3d79e63,
+        type: 3}
+      rotationOffset: 180
+    block4ConnSpecial:
+      prefab: {fileID: 3027443492634856452, guid: a67692c36aa5f3d4dac40234aa406bb2,
+        type: 3}
+      rotationOffset: 270
+    block3SpecialConnR:
+      prefab: {fileID: 7990770196973082265, guid: 0f5db7a72526afa46a2177e2b3061b6b,
+        type: 3}
+      rotationOffset: 180
+    block3SpecialConnL:
+      prefab: {fileID: 1512919312846202574, guid: 6739d8e82e8aea0459fff57dea4a80a6,
+        type: 3}
+      rotationOffset: 180
+    block2Corner:
+      prefab: {fileID: 765383810293004029, guid: 50ed8924aca676047be895737d6fca54,
+        type: 3}
+      rotationOffset: 180
+    block3Balcony:
+      prefab: {fileID: 2030045782903483153, guid: 4a703286d6ae56048bf31267c254fa67,
+        type: 3}
+      rotationOffset: 180
+    block3ConnTBalcony:
+      prefab: {fileID: 2208514017038411856, guid: 3660450d04956884bbfd785b3fb64bc5,
+        type: 3}
+      rotationOffset: 0
+    block4InnerCorner:
+      prefab: {fileID: 5090701276480532763, guid: 082306f832cdf6d4c80460b9bcedc93f,
+        type: 3}
+      rotationOffset: -90
+    block4Floor:
+      prefab: {fileID: 7858637113542270105, guid: 9da44632c254de54e8b07a8c4c15aebb,
+        type: 3}
+      rotationOffset: 0
+    block0ConnTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block1ConnTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block2ConnStraightTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block2ConnCornerThinTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block3ConnTTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block4ConnTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block4ConnSpecialFourWayTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block3ConnTSpecialRTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block3ConnTSpecialLTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block4ConnSpecialTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block3SpecialConnRTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block3SpecialConnLTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block2CornerTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block3BalconyTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0
+    block4InnerCornerTerrain:
+      prefab: {fileID: 0}
+      rotationOffset: 0

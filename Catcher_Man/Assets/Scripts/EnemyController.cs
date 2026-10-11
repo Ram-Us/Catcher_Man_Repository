@@ -9,7 +9,9 @@ public class EnemyController : MonoBehaviour
     public int EnemyAttackDamage => enemyAttackDamage;
 
     [SerializeField] private ItemDataBase db;
+    [SerializeField] private float DestroyTime;
 
+    [SerializeField] private bool isSelectedBoss = false;
 
     
 
@@ -20,11 +22,11 @@ public class EnemyController : MonoBehaviour
         {   
             int id = item.Id;
             int playerDamage = db.GetAttackById(id);
-            Debug.Log(enemyHp +"<"+ playerDamage);
+            //Debug.Log(enemyHp +"<"+ playerDamage);
+
             if(enemyHp <= playerDamage)
             {
-                Destroy(this.gameObject);
-                Debug.Log("敵撃破");
+                DefeatEnemy();
             }
             else
             {
@@ -42,4 +44,21 @@ public class EnemyController : MonoBehaviour
     {
         enemyHp -= damage;
     }
+    private void DefeatEnemy()
+    {
+        if (isSelectedBoss)
+        {
+            
+            this.transform.GetChild(0).gameObject.GetComponent<Animator>().SetTrigger("Defeat");
+            
+        }
+        Debug.Log("やられます");
+        Invoke(nameof(ExplosionEnemy),DestroyTime);
+        
+    }
+    private void ExplosionEnemy()
+    {
+        Destroy(this.gameObject);
+    }
 }
+

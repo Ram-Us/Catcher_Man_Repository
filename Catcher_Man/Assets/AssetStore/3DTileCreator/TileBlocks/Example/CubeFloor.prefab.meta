@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9da44632c254de54e8b07a8c4c15aebb
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 396854
+  packageName: 3D Tile Painter - DEMO
+  packageVersion: 1.0
+  assetPath: Assets/3DTileCreator/TileBlocks/Example/CubeFloor.prefab
+  uploadId: 981696

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e3870d665d01025479f9cbf3439936b7
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 396854
+  packageName: 3D Tile Painter - DEMO
+  packageVersion: 1.0
+  assetPath: Assets/3DTileCreator/TileBlocks/Example/CubeCutBasicShape.prefab
+  uploadId: 981696

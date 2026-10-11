@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3e3d3c8b87e7c904d93d35dd4348ddbd
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 396854
+  packageName: 3D Tile Painter - DEMO
+  packageVersion: 1.0
+  assetPath: Assets/3DTileCreator/TileBlocks/Example/CubeCornerTerrain.prefab
+  uploadId: 981696

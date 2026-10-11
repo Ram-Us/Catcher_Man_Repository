@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4a703286d6ae56048bf31267c254fa67
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 396854
+  packageName: 3D Tile Painter - DEMO
+  packageVersion: 1.0
+  assetPath: Assets/3DTileCreator/TileBlocks/Example/CubeBalcony.prefab
+  uploadId: 981696

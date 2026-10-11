@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 22f06f3e47ff69e4688388b9a77f24db
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 396854
+  packageName: 3D Tile Painter - DEMO
+  packageVersion: 1.0
+  assetPath: Assets/3DTileCreator/TileBlocks/Example/TThinBlock.prefab
+  uploadId: 981696
