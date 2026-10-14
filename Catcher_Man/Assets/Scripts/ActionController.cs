@@ -12,7 +12,6 @@ public class ActionController : MonoBehaviour
     [SerializeField] private ItemSearcher ic;
     private int selectNumber,id = 0;
     public int SelectNumber => selectNumber;
-    [SerializeField]float shootSpeed = 5f;
     private float equippedItemScale,beforeMoveDirection,moveDirection,weaponPositionX,weaponRotationZ;
     [SerializeField]private List<int> getItems = new();
     [SerializeField] private GameObject shootPoint,weapon;
@@ -139,6 +138,7 @@ public class ActionController : MonoBehaviour
             Destroy(rGb);
             return;
         }
+        itemGimmick.Initialize(getItems[selectNumber]);
         rGb.transform.position = weapon.transform.position;
         if(beforeMoveDirection == 1)
         {
@@ -149,7 +149,7 @@ public class ActionController : MonoBehaviour
         }
         //rGb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
         rGb.transform.localEulerAngles = new Vector3(0f,90f,0f);
-        itemGimmick.Initialize(getItems[selectNumber]);
+        
         itemGimmick.SetAttach(false);
         //rGb.transform.rotation = this.transform.rotation * Quaternion.Euler(0f,180f,0f);
         rGb.SetActive(true);
@@ -213,6 +213,7 @@ public class ActionController : MonoBehaviour
         return;
     }
 
+    itemGimmick.Initialize(selectedItemId);
     rgb.transform.position = weapon.transform.position;
     if(beforeMoveDirection == 1)
     {
@@ -225,7 +226,7 @@ public class ActionController : MonoBehaviour
     // 角度はQuaternion.Eulerで設定する
     rgb.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
 
-    itemGimmick.Initialize(selectedItemId);
+    
     itemGimmick.SetAttach(false);
     itemGimmick.SetThrown(true);
 

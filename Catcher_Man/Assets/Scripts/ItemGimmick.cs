@@ -20,6 +20,7 @@ public class ItemGimmick : MonoBehaviour {
     [SerializeField] private bool isAttached;
     public bool IsAttached => isAttached;
     [SerializeField] private bool isThrown;
+    [SerializeField] private bool isTrap;
     public bool IsThrown => isThrown;
 
     void Awake()
@@ -27,7 +28,8 @@ public class ItemGimmick : MonoBehaviour {
         if (frame != null)
         {
             Animator itemAnimator = GetComponent<Animator>();
-            if (itemAnimator != null)
+            string anim = itemAnimator.runtimeAnimatorController.name;
+            if (itemAnimator != null　&& anim != "IronBallObject")
             {
                 itemAnimator.enabled = false;
             }
@@ -94,14 +96,18 @@ public class ItemGimmick : MonoBehaviour {
             }
         }
         //Debug.Log(idb.Position.x);
-        this.transform.position = new Vector3(idb.Position.x,transform.position.y,transform.position.z);
-        this.transform.localScale = idb.Size;
+        if (!isTrap)
+        {
+            this.transform.position = new Vector3(idb.Position.x,transform.position.y,transform.position.z);
+            this.transform.localScale = idb.Size;
+        }
         
         cl = GetComponent<BoxCollider>();
         if (cl != null)
         {
             cl.size = idb.ColliderSize;
             cl.center = idb.ColliderCenterSize;
+            cl.isTrigger = false;
         }
         if (idb.Rotated)
         {
@@ -173,11 +179,11 @@ public class ItemGimmick : MonoBehaviour {
     }
     private void OnCollisionEnter(Collision collision)
     {
-        /*if(collision.gameObject.CompareTag("Item"))
+        if(collision.gameObject.CompareTag("Player") && isTrap)
         {
-            Debug.Log("アイテムに触れた");
-            Destroy(collision.gameObject);
-        }*/
+            int playerDamage = db.GetAttackById(id);
+            collision.gameObject.GetComponent<PlayerManager>().SetPlayerHp(playerDamage);
+        }
         if(collision.gameObject.CompareTag("Ground"))
         {
             Rigidbody rb = GetComponent<Rigidbody>();
