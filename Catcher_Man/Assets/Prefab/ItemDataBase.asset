@@ -87,10 +87,10 @@ MonoBehaviour:
     itemName: "\u306F\u3057\u3054"
     cost: 3
     position: {x: -0.365, y: 0, z: 0}
-    size: {x: 1, y: 1, z: 1}
+    size: {x: 1.5, y: 1.5, z: 1}
     speed: 5
     attack: 1
-    colliderSize: {x: 1, y: 3, z: 0.25}
+    colliderSize: {x: 1, y: 3, z: 0.45}
     colliderCenterSize: {x: 0, y: 1.53, z: 0}
     instance: {fileID: 4341995269951199168, guid: eda3fb107fcf91747bdd93b4a8abfcef, type: 3}
     rotated: 0
@@ -121,8 +121,8 @@ MonoBehaviour:
     itemName: "\u9244\u7403"
     cost: 3
     position: {x: 0, y: 0, z: 0}
-    size: {x: 2.8, y: 2.6, z: 3}
-    speed: 5
+    size: {x: 5, y: 5, z: 5}
+    speed: 10
     attack: 10
     colliderSize: {x: 0.28, y: 0.25, z: 0.1}
     colliderCenterSize: {x: -1.03, y: 0, z: 0}

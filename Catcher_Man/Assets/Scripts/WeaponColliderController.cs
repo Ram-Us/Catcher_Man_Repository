@@ -5,6 +5,7 @@ public class WeaponColliderController : MonoBehaviour
 {
     [SerializeField] private Transform weaponPivot;
     [SerializeField] private float swingAngle = 60f;
+    [SerializeField, Min(0f)] private float swingDrop = 0.1f;
 
     [Min(0.01f)]
     [SerializeField] private float duration = 0.4f;
@@ -13,6 +14,7 @@ public class WeaponColliderController : MonoBehaviour
     private bool hasStartRotation;
     private Coroutine swingCoroutine;
     private Quaternion startRotation;
+    private Vector3 startPosition;
 
     public void SwingInitialize()
     {
@@ -37,6 +39,7 @@ public class WeaponColliderController : MonoBehaviour
 
         // ActionControllerが設定した現在角度を新しい基準にする。
         startRotation = weaponPivot.localRotation;
+        startPosition = weaponPivot.localPosition;
         hasStartRotation = true;
     }
 
@@ -70,6 +73,7 @@ public class WeaponColliderController : MonoBehaviour
         isSwinging = true;
 
         startRotation = weaponPivot.localRotation;
+        startPosition = weaponPivot.localPosition;
         hasStartRotation = true;
 
         float elapsedTime = 0f;
@@ -89,11 +93,15 @@ public class WeaponColliderController : MonoBehaviour
             weaponPivot.localRotation =
                 startRotation *
                 Quaternion.Euler(0f, 0f, angle);
+            Vector3 position = startPosition;
+            position.y -= swingDrop * Mathf.Sin(progress * Mathf.PI);
+            weaponPivot.localPosition = position;
 
             yield return null;
         }
 
         weaponPivot.localRotation = startRotation;
+        weaponPivot.localPosition = startPosition;
 
         isSwinging = false;
         swingCoroutine = null;
@@ -107,6 +115,7 @@ public class WeaponColliderController : MonoBehaviour
         if (weaponPivot != null && hasStartRotation)
         {
             weaponPivot.localRotation = startRotation;
+            weaponPivot.localPosition = startPosition;
         }
     }
 

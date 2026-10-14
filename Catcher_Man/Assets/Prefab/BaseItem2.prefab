@@ -851,6 +851,7 @@ MonoBehaviour:
   id: 0
   isAttached: 0
   isThrown: 0
+  isTrap: 0
 --- !u!95 &672841825025377461
 Animator:
   serializedVersion: 7
@@ -1071,7 +1072,7 @@ GameObject:
   - component: {fileID: 3562715014452519152}
   m_Layer: 0
   m_Name: IronBall
-  m_TagString: Item
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

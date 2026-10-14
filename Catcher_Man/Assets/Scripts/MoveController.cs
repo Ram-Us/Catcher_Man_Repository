@@ -16,6 +16,7 @@ public class MoveController : MonoBehaviour
     private InputAction jumpAction;
     private readonly HashSet<Collider> supportContacts = new();
     private readonly HashSet<Collider> ladderContacts = new();
+    private readonly HashSet<Collider> conveyorContacts = new();
 
     private float moveInput;
     public float MoveInput => moveInput;
@@ -57,6 +58,7 @@ public class MoveController : MonoBehaviour
         
         supportContacts.Clear();
         ladderContacts.Clear();
+        conveyorContacts.Clear();
         
     }
 
@@ -64,6 +66,16 @@ public class MoveController : MonoBehaviour
     {
         // Destroy済みの接触相手が残っても接地やはしご扱いを続けない。
         supportContacts.RemoveWhere(c => c == null || !c.enabled || !c.gameObject.activeInHierarchy);
+        conveyorContacts.RemoveWhere(c =>
+        {
+            if (c == null || !c.enabled || !c.gameObject.activeInHierarchy)
+            {
+                return true;
+            }
+
+            ConveyorBelt conveyor = c.GetComponentInParent<ConveyorBelt>();
+            return conveyor == null || !conveyor.isActiveAndEnabled;
+        });
         ladderContacts.RemoveWhere(c =>
         {
             if (c == null || !c.enabled || !c.gameObject.activeInHierarchy)
@@ -136,7 +148,19 @@ public class MoveController : MonoBehaviour
     private void Move()
     {
         Vector3 velocity = rb.linearVelocity;
-        velocity.z = moveInput * moveSpeed;
+        float conveyorSpeed = 0f;
+        float inputSpeedMultiplier = 1f;
+        foreach (Collider contact in conveyorContacts)
+        {
+            ConveyorBelt conveyor = contact.GetComponentInParent<ConveyorBelt>();
+            if (conveyor == null)
+            {
+                continue;
+            }
+            conveyorSpeed = Mathf.Max(conveyorSpeed, conveyor.BeltSpeed);
+            inputSpeedMultiplier = Mathf.Min(inputSpeedMultiplier, conveyor.InputSpeedMultiplier);
+        }
+        velocity.z = moveInput * moveSpeed * inputSpeedMultiplier - conveyorSpeed;
         velocity.x = 0f;
         rb.linearVelocity = velocity;
     }
@@ -162,8 +186,9 @@ public class MoveController : MonoBehaviour
     {
         Collider other = collision.collider;
         ItemGimmick item = other.GetComponentInParent<ItemGimmick>();
+        ConveyorBelt conveyor = other.GetComponentInParent<ConveyorBelt>();
 
-        if (collision.gameObject.CompareTag("Ground") || item != null)
+        if (collision.gameObject.CompareTag("Ground") || item != null || conveyor != null)
         {
             bool standingOnTop = false;
             for (int i = 0; i < collision.contactCount; i++)
@@ -181,6 +206,15 @@ public class MoveController : MonoBehaviour
             else
             {
                 supportContacts.Remove(other);
+            }
+
+            if (standingOnTop && conveyor != null && conveyor.IsPlayer(gameObject))
+            {
+                conveyorContacts.Add(other);
+            }
+            else
+            {
+                conveyorContacts.Remove(other);
             }
         }
 
@@ -200,6 +234,7 @@ public class MoveController : MonoBehaviour
         // 地面との離脱時にも呼ばれるため、ItemGimmickを前提にしない。
         supportContacts.Remove(collision.collider);
         ladderContacts.Remove(collision.collider);
+        conveyorContacts.Remove(collision.collider);
     }
 
     // 拾ったオブジェクトはOnCollisionExitを経ずに破棄されることがある。
