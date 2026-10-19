@@ -4,18 +4,20 @@ public class EnergyBallManager : MonoBehaviour
 {
 
     [SerializeField] private GameObject Boss;
+    [SerializeField]private int ballDamage = 50;
 
     private void OnCollisionEnter(Collision collision)
     {
         //Debug.Log(collision.gameObject);
         if (collision.gameObject.CompareTag("Player"))
         {
-            int damage = Boss.gameObject.GetComponent<BossController>().BossSpecialDamage;
-            collision.gameObject.GetComponent<PlayerManager>().SetPlayerHp(damage);
+            collision.gameObject.GetComponent<PlayerManager>().SetPlayerHp(ballDamage);
+            Debug.Log("プレイヤーに必殺技が的中");
             
-        }else if (collision.gameObject.CompareTag("Wall") || collision.gameObject.CompareTag("Enemy"))
-        {
-            Debug.Log("当たった");
+        }else if (collision.gameObject.CompareTag("Enemy")&&!(Boss.GetComponent<BossController>().IsSpecialized)){
+        
+            collision.gameObject.GetComponent<EnemyController>().SetEnemyHp(ballDamage);
+            Debug.Log("ボスに必殺技が命中");
         }
         else if (collision.gameObject.CompareTag("Bullet"))
         {

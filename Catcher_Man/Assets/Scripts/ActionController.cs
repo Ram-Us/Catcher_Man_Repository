@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UIElements;
-using JetBrains.Annotations;
+using Unity.VisualScripting;
 public class ActionController : MonoBehaviour
 {
     private InputAction catchAction,putAction,selectAction,throwAction,swingAction;
@@ -12,10 +12,15 @@ public class ActionController : MonoBehaviour
     [SerializeField] private ItemSearcher ic;
     private int selectNumber,id = 0;
     public int SelectNumber => selectNumber;
+    [SerializeField]float shootSpeed = 5f;
     private float equippedItemScale,beforeMoveDirection,moveDirection,weaponPositionX,weaponRotationZ;
     [SerializeField]private List<int> getItems = new();
     [SerializeField] private GameObject shootPoint,weapon;
     private GameObject weaponObject;
+    [SerializeField]private bool isAttacking;
+    public bool IsAttacking => isAttacking;
+    [SerializeField, Min(0.01f)] private float ironBallAttackDuration = 0.4f;
+    private Coroutine attackFlagCoroutine;
     public bool IsLadderEquipped
     {
         get
@@ -32,9 +37,20 @@ public class ActionController : MonoBehaviour
     private Animator weaponAnimator;
     private Animator playerAnimator;
     private WeaponColliderController weaponColliderController;
+    [SerializeField] private SpecialShooter sp;
+    [SerializeField, Min(0f)] private float specialShootDelay = 3f;
+    private bool isSpecialCharging;
+    private Coroutine specialShootCoroutine;
     SpriteRenderer PresentWeaponVisual;
     Sprite choicedWeaponVisual;
     [SerializeField] ItemDataBase dataBase;
+    private GameObject effect;
+    [SerializeField] private GameObject swingEffectPrefab,swingEffectPrefab1;
+    [SerializeField] private Transform swingEffectPoint;
+    private GameObject currentParticlePrefab;
+    private Transform effectPoint;
+
+
     private void Awake()
     {
         catchAction = InputSystem.actions.FindAction("Catch");
@@ -49,7 +65,15 @@ public class ActionController : MonoBehaviour
         {
             weaponColliderController = weapon.GetComponent<WeaponColliderController>();
         }
+        if (sp == null)
+        {
+            sp = GetComponent<SpecialShooter>();
+        }
         beforeMoveDirection = gameObject.GetComponent<MoveController>().MoveInput;
+        if (beforeMoveDirection == 0f)
+        {
+            beforeMoveDirection = 1f;
+        }
         weaponPositionX = weapon.transform.localPosition.x;
     }
     private void OnEnable() {
@@ -66,9 +90,25 @@ public class ActionController : MonoBehaviour
         selectAction.started -= OnSelect;
         throwAction.started -= OnThrow;
         swingAction.started -= OnSwing;
+
+        if (specialShootCoroutine != null)
+        {
+            StopCoroutine(specialShootCoroutine);
+            specialShootCoroutine = null;
+        }
+
+        EndWeaponAttack();
+        isSpecialCharging = false;
     }
     void FixedUpdate()
     {
+        if (isAttacking &&
+            attackFlagCoroutine == null &&
+            (weaponColliderController == null || !weaponColliderController.IsSwinging))
+        {
+            EndWeaponAttack();
+        }
+
         moveDirection = gameObject.GetComponent<MoveController>().MoveInput;
         //Debug.Log(beforeMoveDirection +"==" +moveDirection);
         if(moveDirection != 0 && beforeMoveDirection != moveDirection)
@@ -88,9 +128,9 @@ public class ActionController : MonoBehaviour
     {
         if (isTouched)
         {   //Debug.Log("タッチ");
-            id = dataBase.GetId(gb);
-            Debug.Log(id+"を取得");
-            if (sc.TryAdd())//空きがある状態での同アイテムに加算、もしくは空いた枠にアイテムを格納
+            
+            //Debug.Log(id+"を取得");
+            if (sc.TryAdd() && id > 0 )//空きがある状態での同アイテムに加算、もしくは空いた枠にアイテムを格納
             {
                 //Debug.Log("獲得！");
                 for(int i = 0; i < getItems.Count; i++)
@@ -98,13 +138,13 @@ public class ActionController : MonoBehaviour
                     if (getItems[i] == id)
                     {
                         SetItem(gb,i,true);
-                        Debug.Log("同じアイテムが入ってるので足したぞ！");
+                        //Debug.Log("同じアイテムが入ってるので足したぞ！");
                         break;
                     }else if (getItems[i] == 0)
                     {
                         getItems[i] = id;
                         SetItem(gb,i,false);
-                        Debug.Log("空き枠に新しいアイテムを入れたぞ！");
+                        //Debug.Log("空き枠に新しいアイテムを入れたぞ！");
                         break;
                     }
                 }
@@ -129,6 +169,7 @@ public class ActionController : MonoBehaviour
     }
     private void OnPut(InputAction.CallbackContext context)
     {
+        EndWeaponAttack();
         weapon.SetActive(false);
         GameObject rGb = Instantiate(dataBase.GetIntanceById(getItems[selectNumber]));
         ItemGimmick itemGimmick = rGb.GetComponent<ItemGimmick>();
@@ -139,7 +180,10 @@ public class ActionController : MonoBehaviour
             return;
         }
         itemGimmick.Initialize(getItems[selectNumber]);
-        rGb.transform.position = weapon.transform.position;
+        Vector3 kariPositon = rGb.transform.position;
+        kariPositon.y = weapon.transform.position.y;
+        kariPositon.z = weapon.transform.position.z;
+        rGb.transform.position = kariPositon;
         if(beforeMoveDirection == 1)
         {
             rGb.transform.position += new Vector3(0f,0f,1f);
@@ -148,8 +192,7 @@ public class ActionController : MonoBehaviour
             rGb.transform.position += new Vector3(0f,0f,-1f);
         }
         //rGb.transform.position = this.transform.position + new Vector3(0f,0f,1f);
-        rGb.transform.localEulerAngles = new Vector3(0f,90f,0f);
-        
+        SetDroppedItemRotation(rGb.transform, getItems[selectNumber]);
         itemGimmick.SetAttach(false);
         //rGb.transform.rotation = this.transform.rotation * Quaternion.Euler(0f,180f,0f);
         rGb.SetActive(true);
@@ -176,6 +219,7 @@ public class ActionController : MonoBehaviour
     }
     private void OnThrow(InputAction.CallbackContext context)
     {
+    EndWeaponAttack();
     int selectedItemId = getItems[selectNumber];
 
     if (selectedItemId <= 0)
@@ -214,6 +258,7 @@ public class ActionController : MonoBehaviour
     }
 
     itemGimmick.Initialize(selectedItemId);
+    
     rgb.transform.position = weapon.transform.position;
     if(beforeMoveDirection == 1)
     {
@@ -223,10 +268,8 @@ public class ActionController : MonoBehaviour
         rgb.transform.position += new Vector3(0f,0f,-1f);
     }
 
-    // 角度はQuaternion.Eulerで設定する
-    rgb.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+    SetDroppedItemRotation(rgb.transform, selectedItemId);
 
-    
     itemGimmick.SetAttach(false);
     itemGimmick.SetThrown(true);
 
@@ -248,12 +291,19 @@ public class ActionController : MonoBehaviour
         beforeMoveDirection * -transform.right * dataBase.GetSpeedById(selectedItemId),
         ForceMode.Impulse
     );
+    rg.constraints |= RigidbodyConstraints.FreezePositionY;
+
+    if (id == 5)
+    {
+        rg.constraints &= ~RigidbodyConstraints.FreezeRotationZ;
+        rgb.transform.rotation = Quaternion.Euler(0f,90f,beforeMoveDirection*90f);
+    }
 
     // ItemTypeが5なら回転を加える
     if ((int)dataBase.GetItemTypeById(selectedItemId) == 5)
     {
         // オブジェクト自身のZ回転だけを許可;
-        rg.constraints |= RigidbodyConstraints.FreezePositionY;
+        
         rg.constraints &= ~RigidbodyConstraints.FreezeRotationZ;
 
 
@@ -274,6 +324,13 @@ public class ActionController : MonoBehaviour
 
     sc.SubStock(selectNumber);
     }
+
+    private static void SetDroppedItemRotation(Transform itemTransform, int itemId)
+    {
+        float worldYRotation = itemId == 9 ? 0f : 90f;
+        itemTransform.rotation = Quaternion.Euler(0f, worldYRotation, 0f);
+    }
+
     private void OnSwing(InputAction.CallbackContext context)
     {
         // 武器がまだ出ていなければ出す
@@ -300,7 +357,38 @@ public class ActionController : MonoBehaviour
                 Debug.LogWarning("鉄球のAnimatorが見つかりません。");
                 return;
             }
+            if (isAttacking)
+            {
+                return;
+            }
+
             weaponAnimator.SetTrigger("IronBall");
+            BeginWeaponAttack();
+            attackFlagCoroutine = StartCoroutine(
+                EndAttackAfterDelay(ironBallAttackDuration));
+        }
+        else if (selectedItemId == 9)
+        {
+            if (weaponAnimator == null)
+            {
+                Debug.LogWarning("3DレーザーガンのAnimatorが見つかりません。");
+                return;
+            }
+
+            if (sp == null)
+            {
+                Debug.LogWarning("SpecialShooterが設定されていません。");
+                return;
+            }
+
+            if (isSpecialCharging)
+            {
+                return;
+            }
+
+            weaponAnimator.SetTrigger("Beam");
+            sp.EnergyBallCharge();
+            specialShootCoroutine = StartCoroutine(ShootSpecialAfterDelay());
         }
         else
         {
@@ -309,21 +397,133 @@ public class ActionController : MonoBehaviour
                 Debug.LogWarning("WeaponColliderControllerが見つかりません。");
                 return;
             }
-            weaponColliderController.SwingWeapon();
+
+            if (!weaponColliderController.IsSwinging)
+            {
+                weaponColliderController.SwingWeapon();
+
+                if (weaponColliderController.IsSwinging)
+                {
+                    BeginWeaponAttack();
+                }
+            }
+            if (swingEffectPrefab != null)
+            {
+                
+
+                if (swingEffectPoint != null)
+                {
+                    effectPoint = swingEffectPoint.transform;
+                }
+                else
+                {
+                    effectPoint = weapon.transform;
+                }
+                if(beforeMoveDirection == 1 || beforeMoveDirection == 0)
+                {
+                    currentParticlePrefab = swingEffectPrefab;
+                }
+                else
+                {
+                    currentParticlePrefab = swingEffectPrefab1;
+                }
+                effect = Instantiate(
+                    currentParticlePrefab,
+                    weapon.transform.position,
+                    weapon.transform.localRotation);
+            
+
+
+                Destroy(effect, 0.5f);
+            }
         }
         Debug.Log("武器を振った");
+    }
+
+    private IEnumerator ShootSpecialAfterDelay()
+    {
+        isSpecialCharging = true;
+        yield return new WaitForSeconds(specialShootDelay);
+
+        if (sp != null)
+        {
+            sp.EnergyBallShoot();
+        }
+
+        isSpecialCharging = false;
+        specialShootCoroutine = null;
+    }
+
+    private IEnumerator EndAttackAfterDelay(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        attackFlagCoroutine = null;
+        EndWeaponAttack();
+    }
+
+    private void BeginWeaponAttack()
+    {
+        if (weaponObject == null)
+        {
+            return;
+        }
+
+        ItemGimmick equippedItem = weaponObject.GetComponent<ItemGimmick>();
+        if (equippedItem == null || !equippedItem.IsAttached)
+        {
+            return;
+        }
+
+        if (attackFlagCoroutine != null)
+        {
+            StopCoroutine(attackFlagCoroutine);
+            attackFlagCoroutine = null;
+        }
+
+        isAttacking = true;
+        equippedItem.BeginAttack();
+    }
+
+    private void EndWeaponAttack()
+    {
+        if (attackFlagCoroutine != null)
+        {
+            StopCoroutine(attackFlagCoroutine);
+            attackFlagCoroutine = null;
+        }
+
+        if (weaponObject != null)
+        {
+            ItemGimmick equippedItem = weaponObject.GetComponent<ItemGimmick>();
+            if (equippedItem != null)
+            {
+                equippedItem.EndAttack();
+            }
+        }
+
+        isAttacking = false;
     }
     private void OnCollisionStay(Collision other) {
         if (other.gameObject.CompareTag("Item"))
         {
             isTouched = true;
             gb = other.gameObject;
+            id = dataBase.GetId(gb);
+            //Debug.Log("itemで"+id+"を格納しているよ");
             //Debug.Log("触れてるよ");
+        }
+        else if (other.gameObject.CompareTag("Items"))
+        {
+            isTouched = true;
+            id = other.gameObject.GetComponent<StockItemSpace>().StockID;
+            gb = other.gameObject;
+            Debug.Log("itemsで"+id+"を格納しているよ");
         }
         else
         {
             isTouched = false;
         }
+
     }
     private int GetSelectedItemId()
     {
@@ -345,15 +545,28 @@ public class ActionController : MonoBehaviour
         {
             weaponColliderController.StopSwing();
         }
+        EndWeaponAttack();
         // 前の武器を消す
         for (int i = weapon.transform.childCount - 1; i >= 0; i--)
         {
             Destroy(weapon.transform.GetChild(i).gameObject);
         }
         int selectedItemId = GetSelectedItemId();
+
+        if (selectedItemId != 9 && specialShootCoroutine != null)
+        {
+            StopCoroutine(specialShootCoroutine);
+            specialShootCoroutine = null;
+            isSpecialCharging = false;
+
+            if (sp != null)
+            {
+                sp.EnergyBallDestroy();
+            }
+        }
+
         // ID6だけZ軸を140度傾ける。それ以外は0度。
         weaponRotationZ = selectedItemId == 6 ? 140f : 0f;
-        weapon.transform.localRotation = Quaternion.Euler(0f, 0f, weaponRotationZ);
 
         Debug.Log(weaponRotationZ);
         // 空のスロットなら武器を隠す
@@ -399,7 +612,7 @@ public class ActionController : MonoBehaviour
         }
         weaponObject.SetActive(true);
         weapon.SetActive(true);
-        Debug.Log((int)dataBase.GetItemTypeById(selectedItemId));
+        //Debug.Log((int)dataBase.GetItemTypeById(selectedItemId));
         weaponAnimator = weaponObject.GetComponentInChildren<Animator>(true);
         if (weaponAnimator != null)
         {
@@ -424,15 +637,21 @@ public class ActionController : MonoBehaviour
     {
         if (!isexisted)
         {
-            sc.RefreshUI(gb);
+            sc.RefreshUI(gb,id);
         }
-        ic.DeleteSearchedItem(gb);
-        MoveController moveController = GetComponent<MoveController>();
-        if (moveController != null)
+        
+        if (gb.CompareTag("Item")){
+            ic.DeleteSearchedItem(gb);
+            MoveController moveController = GetComponent<MoveController>();
+            if (moveController != null)
+            {
+                moveController.ForgetWorldItem(gb);
+            }
+            Destroy(gb);
+        }else if (gb.CompareTag("Items"))
         {
-            moveController.ForgetWorldItem(gb);
+            gb.GetComponent<StockItemSpace>().SubLimitStockNumber();
         }
-        Destroy(gb);
         isTouched = false;
         this.gb = null;
         sc.AddStock(i);
@@ -442,28 +661,45 @@ public class ActionController : MonoBehaviour
     }
     private void WeaponDirection(float moveDirection)
     {
-        if (moveDirection == -1)
+        if (moveDirection == 0f)
         {
-            Debug.Log("左向き");
-            SetWeaponRotation(180f, -weaponRotationZ);
-            //Debug.Log(weapon.transform.rotation.eulerAngles);
-            Vector3 LocalPosition = weapon.transform.localPosition;
-            LocalPosition.x = -weaponPositionX;
-            weapon.transform.localPosition = LocalPosition;
+            return;
         }
-        else if (moveDirection == 1)
+
+        bool isLeft = moveDirection < 0f;
+        int selectedItemId = GetSelectedItemId();
+
+        float yRotation;
+        float zRotation;
+
+        if (selectedItemId == 9)
         {
-            Debug.Log("右向き");
-            SetWeaponRotation(0f, weaponRotationZ);
-            //Debug.Log(weapon.transform.rotation.eulerAngles);
-            Vector3 LocalPosition = weapon.transform.localPosition;
-            LocalPosition.x = weaponPositionX;
-            weapon.transform.localPosition = LocalPosition;
+            yRotation = 0f;
+            zRotation = 0f;
         }
+        else
+        {
+            yRotation = isLeft ? 180f : 0f;
+            zRotation = isLeft ? -weaponRotationZ : weaponRotationZ;
+        }
+
+        SetWeaponRotation(yRotation, zRotation);
+
+        Vector3 localPosition = weapon.transform.localPosition;
+        localPosition.x = isLeft ? -weaponPositionX : weaponPositionX;
+        weapon.transform.localPosition = localPosition;
     }
 
     private void SetWeaponRotation(float yRotation, float zRotation)
     {
+        if (GetSelectedItemId() == 9)
+        {
+            Vector3 worldEulerAngles = weapon.transform.eulerAngles;
+            worldEulerAngles.y = 0f;
+            weapon.transform.eulerAngles = worldEulerAngles;
+            return;
+        }
+
         Quaternion faceDirection = Quaternion.Euler(0f, yRotation, 0f);
         Quaternion tilt = Quaternion.Euler(0f, 0f, zRotation);
         weapon.transform.localRotation = tilt * faceDirection;

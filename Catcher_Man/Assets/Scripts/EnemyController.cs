@@ -9,24 +9,30 @@ public class EnemyController : MonoBehaviour
     public int EnemyAttackDamage => enemyAttackDamage;
 
     [SerializeField] private ItemDataBase db;
-    [SerializeField] private float DestroyTime;
+    [SerializeField] private GameObject hitEffectPrefab;
 
-    [SerializeField] private bool isSelectedBoss = false;
 
     
 
     private void OnCollisionEnter(Collision collision)
     {
+        // ボスのHP・撃破・特殊武器解除はBossController側で一元管理する。
+        // ここでも処理すると二重ダメージや即Destroyが発生するため、通常敵だけ処理する。
+        if (TryGetComponent<BossController>(out _))
+        {
+            return;
+        }
+
         ItemGimmick item = collision.gameObject.GetComponent<ItemGimmick>();
         if(collision.gameObject.CompareTag("Item") &&(item.GetThrown() || item.IsAttached) )
         {   
             int id = item.Id;
             int playerDamage = db.GetAttackById(id);
-            //Debug.Log(enemyHp +"<"+ playerDamage);
-
-            if(enemyHp <= playerDamage)
+            Debug.Log(enemyHp +"<"+ playerDamage);
+            if(enemyHp < playerDamage)
             {
-                DefeatEnemy();
+                Destroy(this.gameObject);
+                Debug.Log("敵撃破");
             }
             else
             {
@@ -37,6 +43,18 @@ public class EnemyController : MonoBehaviour
             {
                 Destroy(collision.gameObject);
             }
+            if (hitEffectPrefab != null &&
+            collision.contactCount > 0)
+            {
+                ContactPoint contact = collision.GetContact(0);
+
+                GameObject pre = Instantiate(
+                    hitEffectPrefab,
+                    contact.point,
+                    Quaternion.LookRotation(contact.normal)
+                );
+                Destroy(pre);
+            }
             
         }
     }
@@ -44,21 +62,4 @@ public class EnemyController : MonoBehaviour
     {
         enemyHp -= damage;
     }
-    private void DefeatEnemy()
-    {
-        if (isSelectedBoss)
-        {
-            
-            this.transform.GetChild(0).gameObject.GetComponent<Animator>().SetTrigger("Defeat");
-            
-        }
-        Debug.Log("やられます");
-        Invoke(nameof(ExplosionEnemy),DestroyTime);
-        
-    }
-    private void ExplosionEnemy()
-    {
-        Destroy(this.gameObject);
-    }
 }
-
