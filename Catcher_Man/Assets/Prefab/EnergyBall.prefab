@@ -9720,6 +9720,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Boss: {fileID: 4125030032239404139, guid: b8a1c1810e7671d4492775f991eaf9b4, type: 3}
+  Player: {fileID: 3170357763474722860, guid: 09f9ceb03ec0d5445a63797edeca1ecb, type: 3}
 --- !u!54 &8094328213164910316
 Rigidbody:
   m_ObjectHideFlags: 0

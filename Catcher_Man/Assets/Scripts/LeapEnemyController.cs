@@ -21,6 +21,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
     private Rigidbody rb;
     [SerializeField] private bool isGrounded = false,isColided = false,ShooterType = false;
     private bool leapRequested = false;
+    private bool isAttacking;
 
     void Awake()
     {
@@ -102,6 +103,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
                 
                 break;
         }
+
     }
 
     void FixedUpdate()
@@ -140,6 +142,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
                 }
                 if (leapRequested)
                 {
+                    isAttacking = !ShooterType;
                     direction = Mathf.Sign(player.position.z - transform.position.z);
                     velocity = rb.linearVelocity;
                     velocity.x = 0f;
@@ -171,16 +174,35 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            int damage = this.gameObject.GetComponent<EnemyController>().EnemyAttackDamage;
-            collision.gameObject.GetComponent<PlayerManager>().SetPlayerHp(damage);
-            isColided = true;
-        }
+        TryDamagePlayer(collision.gameObject);
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
+            isAttacking = false;
         }
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        TryDamagePlayer(collision.gameObject);
+    }
+
+    private void TryDamagePlayer(GameObject target)
+    {
+        if (!isAttacking || isColided || !target.CompareTag("Player"))
+        {
+            return;
+        }
+
+        PlayerManager playerManager = target.GetComponent<PlayerManager>();
+        if (playerManager == null)
+        {
+            Debug.LogWarning("PlayerタグのオブジェクトにPlayerManagerがありません。", target);
+            return;
+        }
+
+        playerManager.SetPlayerHp(enemyData.EnemyAttackDamage);
+        isColided = true;
     }
     private void OnCollisionExit(Collision collision) {
         

@@ -25,7 +25,7 @@ public class SlotController : MonoBehaviour
         Debug.Log("全スロットを調べたが空きがなかった");
         return false;
     }
-    public void RefreshUI(GameObject getItem)
+    public void RefreshUI(GameObject getItem,int id)
     {
         int i = 0;
         foreach(Image sItem in slotItem)
@@ -33,20 +33,31 @@ public class SlotController : MonoBehaviour
             Image SItem = sItem.GetComponent<Image>();
             if(SItem.sprite == baseSprite)
             {
-                if (getItem.GetComponent<ItemGimmick>().Id== 7)
+                int itemId = id;
+                if (getItem.CompareTag("Items"))
                 {
-                    GameObject ironBall = getItem.transform.GetChild(0).gameObject;
-                    sr = ironBall.GetComponent<SpriteRenderer>();
-
+                    SItem.sprite = dataBase.GetSpriteById(itemId);
                 }
-                else
+                else if (getItem.CompareTag("Item"))
                 {
-                    sr = getItem.GetComponent<SpriteRenderer>(); 
+                    if (itemId == 9)
+                    {
+                     SItem.sprite = dataBase.GetSpriteById(itemId);
+                    }else if (itemId == 7)
+                    {
+                        GameObject ironBall = getItem.transform.GetChild(0).gameObject;
+                        sr = ironBall.GetComponent<SpriteRenderer>();
+                    }
+                    else
+                    {
+                        
+                        sr = getItem.GetComponent<SpriteRenderer>();
+                    }
+                    SItem.sprite = sr.sprite;
                 }
                 RectTransform rect = SItem.rectTransform;
-                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,dataBase.GetWidthById(getItem.GetComponent<ItemGimmick>().Id));
-                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,dataBase.GetHeightById(getItem.GetComponent<ItemGimmick>().Id));
-                SItem.sprite = sr.sprite;
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,dataBase.GetWidthById(itemId));
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,dataBase.GetHeightById(itemId));
                 //getItem.SetActive(false);
                 Debug.Log(i+"番目に入れたぞ");
                 break;

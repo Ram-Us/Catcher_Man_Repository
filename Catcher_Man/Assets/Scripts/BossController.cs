@@ -28,10 +28,35 @@ public class BossController : MonoBehaviour,IEnemyProvider
     [SerializeField] private int random;
     private Rigidbody rb;
     [SerializeField]private Animator anim;
-    [SerializeField] private bool isGrounded = false,isColided = false,isShoot = false,isSpeciealized = true,isStopped,isSpecialStarted = false,isSpecialShot = false;
+    [SerializeField] private bool isGrounded = false,isShoot = false,isSpeciealized = true,isStopped,isSpecialStarted = false,isSpecialShot = false;
+    public bool IsSpecialized => isSpeciealized;
+    private bool isAttacking;
+    private bool hasDamagedThisAttack;
     private Vector3 leftRotation = new Vector3(0f,180f,0f),rightRotation = new Vector3(0f,0f,0f);
     private AnimatorStateInfo stateInfo;
     [SerializeField] private SpecialShooter sp;
+
+    [Header("Melee Damage")]
+    [SerializeField, Range(0f, 1f)] private float meleeDamageStartNormalized = 0.3f;
+    [SerializeField, Range(0f, 1f)] private float meleeDamageEndNormalized = 0.6f;
+
+    [Header("Item Damage")]
+    [SerializeField] private ItemDataBase itemDataBase;
+    [SerializeField] private int gearItemId = 3;
+    [SerializeField, Min(1)] private int requiredGearHits = 5;
+    [SerializeField] private int depthAttackDropItemId = 7;
+    [SerializeField] private Transform itemDropPoint;
+    [SerializeField]private int currentGearHits;
+    private bool depthAttackLocked;
+    private bool depthAttackItemDropped;
+
+    [Header("Defeat")]
+    [SerializeField] private string defeatTriggerName = "Defeat";
+    [SerializeField] private GameObject defeatEffectPrefab;
+    [SerializeField] private Transform defeatEffectPoint;
+    [SerializeField, Min(0f)] private float defeatDestroyDelay = 2f;
+    private float defeatTimer;
+    private bool defeatStarted;
 
     void Awake()
     {
@@ -153,10 +178,24 @@ public class BossController : MonoBehaviour,IEnemyProvider
             {
 
                 stateInfo = anim.GetCurrentAnimatorStateInfo(0);
+
+                if (stateInfo.IsName("Attack") && !anim.IsInTransition(0))
+                {
+                    float animationTime = stateInfo.normalizedTime;
+                    isAttacking =
+                        animationTime >= meleeDamageStartNormalized &&
+                        animationTime <= meleeDamageEndNormalized;
+                }
+                else
+                {
+                    isAttacking = false;
+                }
+
                 // Attackアニメーションがほぼ終了したらCooldownへ移る
                 if (stateInfo.IsName("Attack") &&
                     stateInfo.normalizedTime >= 0.95f)
                 {
+                    isAttacking = false;
                     isShoot = false;
                     currentTimer = coolDownTimer;
                     currentState = EnemyState.CoolDown;
@@ -229,18 +268,30 @@ public class BossController : MonoBehaviour,IEnemyProvider
                 break;
 
             case EnemyState.Defeat:
+                if (!defeatStarted)
+                {
+                    break;
+                }
+
+                defeatTimer -= Time.deltaTime;
+                if (defeatTimer <= 0f)
+                {
+                    Destroy(gameObject);
+                }
                 break;
         }
     }
 
     void FixedUpdate()
     {
-        if (currentState != EnemyState.DepthAttack)
+        if (!depthAttackLocked &&
+            currentState != EnemyState.DepthAttack &&
+            currentState != EnemyState.Defeat)
         {
             specialTimer -= Time.fixedDeltaTime;
             if (specialTimer <= 0f)
             {
-                Debug.Log("必殺技発動");
+                //Debug.Log("必殺技発動");
                 currentState = EnemyState.DepthAttack;
                 specialTimer = specialInterval;
             }
@@ -299,6 +350,8 @@ public class BossController : MonoBehaviour,IEnemyProvider
                 {
                     anim.SetTrigger("Attack");
                     previousState = EnemyState.MeleeAttack;
+                    isAttacking = false;
+                    hasDamagedThisAttack = false;
                 }
 
                 break;
@@ -351,11 +404,11 @@ public class BossController : MonoBehaviour,IEnemyProvider
                     //PlayerDirection();
                     anim.SetTrigger("Special");
                     previousState = EnemyState.DepthAttack;
-                    Debug.Log("準備するぞ");
+                    //Debug.Log("準備するぞ");
                     isSpecialStarted = true;
                     isSpecialShot = false;
                     sp.EnergyBallCharge();
-                    Debug.Log(direction+"のほうを向いてるよ");
+                    //Debug.Log(direction+"のほうを向いてるよ");
                 }
                 
                 break;
@@ -371,7 +424,6 @@ public class BossController : MonoBehaviour,IEnemyProvider
             case EnemyState.Defeat:
 
                 StopMovement();
-                sp.EnergyBallDestroy();
                 break;
         }
     }
@@ -408,17 +460,200 @@ public class BossController : MonoBehaviour,IEnemyProvider
 
     private void OnCollisionEnter(Collision collision)
     {
-        //rb.isKinematic = true;
-        if (collision.gameObject.CompareTag("Player"))
+        ItemGimmick hitItem = collision.gameObject.GetComponent<ItemGimmick>();
+        if (hitItem != null &&
+            collision.gameObject.CompareTag("Item") &&
+            (hitItem.IsThrown || hitItem.IsAttached))
         {
-            int damage = BossAttackDamage;
-            collision.gameObject.GetComponent<PlayerManager>().SetPlayerHp(damage);
-            isColided = true;
+            ReceiveItemHit(hitItem);
+            return;
         }
+
+        TryDamagePlayer(collision.gameObject);
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
         }
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        TryDamagePlayer(collision.gameObject);
+    }
+
+    private void TryDamagePlayer(GameObject target)
+    {
+        if (currentState != EnemyState.MeleeAttack ||
+            !isAttacking ||
+            hasDamagedThisAttack)
+        {
+            return;
+        }
+
+        PlayerManager playerManager = target.GetComponentInParent<PlayerManager>();
+        if (playerManager == null)
+        {
+            return;
+        }
+
+        playerManager.SetPlayerHp(BossAttackDamage);
+        hasDamagedThisAttack = true;
+    }
+
+    // EnemyControllerからボスへの命中処理を委譲するときにも使用する。
+    public void ReceiveItemHit(ItemGimmick item)
+    {
+        if (item == null || defeatStarted)
+        {
+            return;
+        }
+
+        bool wasThrown = item.IsThrown;
+
+        if (item.Id == gearItemId && wasThrown && !depthAttackLocked)
+        {
+            currentGearHits++;
+            Debug.Log($"歯車命中：{currentGearHits}/{requiredGearHits}", this);
+
+            if (currentGearHits >= requiredGearHits)
+            {
+                LockDepthAttackAndDropItem();
+            }
+        }
+
+        if (itemDataBase == null || enemyData == null)
+        {
+            Debug.LogError(
+                "BossControllerのItemDataBaseまたはEnemyControllerが設定されていません。",
+                this);
+            return;
+        }
+
+        int damage = itemDataBase.GetAttackById(item.Id);
+        int hpBeforeHit = enemyData.EnemyHp;
+
+        enemyData.SetEnemyHp(damage);
+
+        // 攻撃値と残りHPが同じ場合もHPが0になるため撃破扱いにする。
+        if (damage >= hpBeforeHit)
+        {
+            StartDefeat();
+        }
+
+        if (wasThrown)
+        {
+            Destroy(item.gameObject);
+        }
+    }
+
+    private void LockDepthAttackAndDropItem()
+    {
+        if (depthAttackLocked)
+        {
+            return;
+        }
+
+        depthAttackLocked = true;
+        isSpeciealized = false;
+
+        if (currentState == EnemyState.DepthAttack)
+        {
+            if (sp != null)
+            {
+                sp.EnergyBallDestroy();
+            }
+
+            isSpecialStarted = false;
+            isSpecialShot = false;
+            currentState = currentDistance > idleDistance
+                ? EnemyState.Idle
+                : EnemyState.Move;
+        }
+
+        if (depthAttackItemDropped)
+        {
+            return;
+        }
+
+        if (itemDataBase == null)
+        {
+            Debug.LogError("BossControllerにItemDataBaseが設定されていません。", this);
+            return;
+        }
+
+        GameObject dropPrefab = itemDataBase.GetIntanceById(depthAttackDropItemId);
+        if (dropPrefab == null)
+        {
+            Debug.LogError(
+                $"ドロップ用アイテムID {depthAttackDropItemId} のPrefabが見つかりません。",
+                this);
+            return;
+        }
+
+        Vector3 dropPosition = itemDropPoint != null
+            ? itemDropPoint.position
+            : transform.position + Vector3.up;
+
+        GameObject droppedItem = Instantiate(
+            dropPrefab,
+            dropPosition,
+            dropPrefab.transform.rotation);
+
+        ItemGimmick droppedItemGimmick = droppedItem.GetComponent<ItemGimmick>();
+        if (droppedItemGimmick != null)
+        {
+            droppedItemGimmick.Initialize(depthAttackDropItemId);
+            droppedItemGimmick.SetAttach(false);
+            droppedItemGimmick.SetThrown(false);
+
+            // Initialize内で座標が変更されるアイテムにも対応する。
+            droppedItem.transform.position = dropPosition;
+        }
+
+        depthAttackItemDropped = true;
+        Debug.Log("DepthAttackを封印し、専用アイテムをドロップしました。", this);
+    }
+
+    private void StartDefeat()
+    {
+        if (defeatStarted)
+        {
+            return;
+        }
+
+        defeatStarted = true;
+        defeatTimer = defeatDestroyDelay;
+        currentState = EnemyState.Defeat;
+        StopMovement();
+
+        if (sp != null)
+        {
+            sp.EnergyBallDestroy();
+        }
+
+        if (anim != null && !string.IsNullOrEmpty(defeatTriggerName))
+        {
+            anim.SetTrigger(defeatTriggerName);
+        }
+
+        if (defeatEffectPrefab != null)
+        {
+            Vector3 effectPosition = defeatEffectPoint != null
+                ? defeatEffectPoint.position
+                : transform.position;
+
+            Instantiate(
+                defeatEffectPrefab,
+                effectPosition,
+                Quaternion.identity);
+        }
+
+        foreach (Collider bossCollider in GetComponentsInChildren<Collider>())
+        {
+            bossCollider.enabled = false;
+        }
+
+        rb.isKinematic = true;
     }
     private void OnCollisionExit(Collision collision) {
 
@@ -426,10 +661,6 @@ public class BossController : MonoBehaviour,IEnemyProvider
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = false;
-        }
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            isColided = false;
         }
     }
 

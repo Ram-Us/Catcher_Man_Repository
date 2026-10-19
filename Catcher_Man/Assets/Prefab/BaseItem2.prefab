@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 303984868368686846}
   - component: {fileID: 2950474181932498207}
   - component: {fileID: 7369345733138025662}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Chain(1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -149,7 +149,7 @@ GameObject:
   - component: {fileID: 5474253151520648226}
   - component: {fileID: 1347547682603671253}
   - component: {fileID: 4841327895608310825}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Chain(4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -286,7 +286,7 @@ GameObject:
   - component: {fileID: 8992868127066649302}
   - component: {fileID: 3613227085781006348}
   - component: {fileID: 1746796571760796713}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Chain(7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -423,7 +423,7 @@ GameObject:
   - component: {fileID: 1110001875187521366}
   - component: {fileID: 2124591542483899576}
   - component: {fileID: 7349597132238897960}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Chain(6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -560,7 +560,7 @@ GameObject:
   - component: {fileID: 7747091313472588477}
   - component: {fileID: 8853496120664266395}
   - component: {fileID: 3358340233729332842}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Chain(5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -700,7 +700,7 @@ GameObject:
   - component: {fileID: 3696910717554907401}
   - component: {fileID: 672841825025377461}
   - component: {fileID: 1319267992355438743}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: BaseItem2
   m_TagString: Item
   m_Icon: {fileID: 0}
@@ -801,7 +801,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -852,6 +852,8 @@ MonoBehaviour:
   isAttached: 0
   isThrown: 0
   isTrap: 0
+  isAttacking: 0
+  hitEffectPrefab: {fileID: 4748681987041982144, guid: aebfb8f69b249bb48b3466d23b0e3c50, type: 3}
 --- !u!95 &672841825025377461
 Animator:
   serializedVersion: 7
@@ -933,7 +935,7 @@ GameObject:
   - component: {fileID: 1830368454176113745}
   - component: {fileID: 3120253801875996320}
   - component: {fileID: 2457739419901600229}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Chain(3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1070,7 +1072,7 @@ GameObject:
   - component: {fileID: 3735570370006883351}
   - component: {fileID: 1889254884250027237}
   - component: {fileID: 3562715014452519152}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: IronBall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1207,7 +1209,7 @@ GameObject:
   - component: {fileID: 7419413986399148551}
   - component: {fileID: 7823102742167423679}
   - component: {fileID: 757219533518466706}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Chain(2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

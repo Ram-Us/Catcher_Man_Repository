@@ -1,12 +1,5 @@
 using UnityEngine;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.LightTransport;
-using Unity.VisualScripting;
-using UnityEngine.UI;
-using UnityEngine.InputSystem.Controls;
-using System.Data.Common;
 
 public class SpecialShooter : MonoBehaviour
 {
@@ -14,23 +7,46 @@ public class SpecialShooter : MonoBehaviour
     [SerializeField] private GameObject prefabEnergyBall;
     private Animator anim;
     private GameObject energyBall;
-    private int random = 0,shootCount = 3,listNumber = 0,scaleCount = 4;
-    [SerializeField] private float BigTime = 3.0f,ShootSpeed = 10f;
+    [SerializeField, Min(1)] private int shootCount = 3;
+    private int listNumber = -1;
+    [SerializeField] private float ShootSpeed = 10f;
     [SerializeField] private Vector3 beforeScale = new Vector3(0f,0f,0f),afterScale = new Vector3(3f,3f,3f);
 
 
 
     public void EnergyBallCharge()
     {
+        if (prefabEnergyBall == null)
+        {
+            Debug.LogError("エネルギーボールのPrefabが設定されていません。", this);
+            return;
+        }
+
+        if (shootPoints == null || shootPoints.Count == 0)
+        {
+            Debug.LogError("発射地点が設定されていません。", this);
+            return;
+        }
+
+        energyBalls.RemoveAll(obj => obj == null);
+
         for(int i = 0;i < shootCount; i++)
         {
             GetRandom();
-            //Debug.Log(listNumber);
+
+            if (shootPoints[listNumber] == null)
+            {
+                Debug.LogWarning($"発射地点 {listNumber} が設定されていません。", this);
+                continue;
+            }
+
             energyBall = Instantiate(prefabEnergyBall,shootPoints[listNumber].transform.position,Quaternion.identity);
             anim = energyBall.GetComponent<Animator>();
-            anim.Play("ChangeScale");
-            //anim.SetTrigger("Big");
-            Debug.Log("準備開始");
+            if (anim != null)
+            {
+                anim.Play("ChangeScale");
+            }
+            //Debug.Log("準備開始");
             energyBalls.Add(energyBall);
             
         }
@@ -43,14 +59,26 @@ public class SpecialShooter : MonoBehaviour
         energyBalls.RemoveAll(obj => obj == null);
         foreach(GameObject gb in energyBalls)
         {
+            if (gb == null)
+            {
+                continue;
+            }
+
             Rigidbody rigidbody = gb.GetComponent<Rigidbody>();
+            if (rigidbody == null)
+            {
+                Debug.LogWarning("エネルギーボールにRigidbodyがありません。", gb);
+                continue;
+            }
+
             rigidbody.AddForce(transform.right*ShootSpeed,ForceMode.Impulse);
             Destroy(gb,10f);
-            Debug.Log("発射");
+            //Debug.Log("発射");
             
         }
         
-        Debug.Log("発射終了");
+        energyBalls.Clear();
+        //Debug.Log("発射終了");
     }
     public void EnergyBallDestroy()
     {
@@ -58,22 +86,34 @@ public class SpecialShooter : MonoBehaviour
         {
             foreach(GameObject i in energyBalls)
             {
-                Debug.Log(i+"を破壊したぞ");
-                Destroy(i);
+                if (i != null)
+                {
+                    Debug.Log(i+"を破壊したぞ");
+                    Destroy(i);
+                }
             }
+
+            energyBalls.Clear();
         }
     }
     private void GetRandom()
     {
-        random = UnityEngine.Random.Range(0,7);
-        if(listNumber == random)
+        if (shootPoints.Count == 1)
         {
-            GetRandom();
+            listNumber = 0;
+            return;
         }
-        else
+
+        int nextNumber = listNumber < 0
+            ? Random.Range(0, shootPoints.Count)
+            : Random.Range(0, shootPoints.Count - 1);
+
+        if (listNumber >= 0 && nextNumber >= listNumber)
         {
-            listNumber = random;
+            nextNumber++;
         }
+
+        listNumber = nextNumber;
     }
 
 }

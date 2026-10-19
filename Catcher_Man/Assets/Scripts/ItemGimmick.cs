@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System;
-using System.Runtime.CompilerServices;
 
 
 
@@ -11,7 +9,7 @@ public class ItemGimmick : MonoBehaviour {
     [SerializeField] private GameObject frame;
     private SpriteRenderer sr,dsr,fsr;
     [SerializeField] private ItemDataBase db;
-    [SerializeField] int id;
+    [SerializeField] int id,trapDamage;
     public int Id => id;
     private bool isInitialized;
 
@@ -20,19 +18,19 @@ public class ItemGimmick : MonoBehaviour {
     [SerializeField] private bool isAttached;
     public bool IsAttached => isAttached;
     [SerializeField] private bool isThrown;
-    [SerializeField] private bool isTrap;
     public bool IsThrown => isThrown;
+    [SerializeField] private bool isTrap;
+    public bool IsTrap => isTrap;
+    [SerializeField] private bool isAttacking;
+    public bool IsAttacking => isAttacking;
+    private readonly HashSet<EnemyController> hitEnemies = new();
+
+    
 
     void Awake()
     {
         if (frame != null)
         {
-            Animator itemAnimator = GetComponent<Animator>();
-            string anim = itemAnimator.runtimeAnimatorController.name;
-            if (itemAnimator != null　&& anim != "IronBallObject")
-            {
-                itemAnimator.enabled = false;
-            }
             frame.SetActive(false);
         }
         //this.transform.rotation *= Quaternion.Euler(0f,180f,0f);
@@ -52,7 +50,6 @@ public class ItemGimmick : MonoBehaviour {
 
     public void Initialize(int itemId)
     {
-        //db = itemDataBase;
         id = itemId;
 
         if (db == null)
@@ -60,68 +57,78 @@ public class ItemGimmick : MonoBehaviour {
             Debug.LogError("ItemDataBaseが設定されていません。", this);
             return;
         }
+        if (id != 0)
+        {
+             //db = itemDataBase;
+            
 
-        var idb = db.GetItemById(id);
-        if (idb == null)
-        {
-            Debug.LogError($"ID {id} のアイテムがデータベースにありません。", this);
-            return;
-        }
-        if (idb.ItemType == ItemType.IronBall)
-        {
-            if (transform.childCount > 0)
+            var idb = db.GetItemById(id);
+            if (idb == null)
             {
-                sr = transform.GetChild(0).GetComponent<SpriteRenderer>();
+                Debug.LogError($"ID {id} のアイテムがデータベースにありません。", this);
+                return;
             }
-        }
-        else
-        {
-            sr = GetComponent<SpriteRenderer>();
-        }
-        
-        if (sr == null)
-        {
-            Debug.LogError("SpriteRendererがありません。", this);
-            return;
-        }
-
-        sr.sprite = idb.Icon;
-
-        if (frame != null)
-        {
-            fsr = frame.GetComponent<SpriteRenderer>();
-            if (fsr != null)
+            if (id != 9)
             {
-                fsr.sprite = idb.Icon;
-            }
-        }
-        //Debug.Log(idb.Position.x);
-        if (!isTrap)
-        {
-            this.transform.position = new Vector3(idb.Position.x,transform.position.y,transform.position.z);
-            this.transform.localScale = idb.Size;
-        }
-        
-        cl = GetComponent<BoxCollider>();
-        if (cl != null)
-        {
-            cl.size = idb.ColliderSize;
-            cl.center = idb.ColliderCenterSize;
-            cl.isTrigger = false;
-        }
-        if (idb.Rotated)
-        {
-            GetComponent<Rigidbody>().constraints |= RigidbodyConstraints.FreezePositionY;
-            //GetComponent<Rigidbody>().isKinematic = true;
-        }
-        else
-        {
-            GetComponent<Rigidbody>().constraints &= ~RigidbodyConstraints.FreezePositionY;
-            //GetComponent<Rigidbody>().isKinematic = false;
-        }
-        isAttached = false;
-        
+                if (idb.ItemType == ItemType.IronBall)
+                {
+                    if (transform.childCount > 0)
+                    {
+                        sr = transform.GetChild(0).GetComponent<SpriteRenderer>();
+                    }
+                }
+                else
+                {
+                    sr = GetComponent<SpriteRenderer>();
+                }
 
+                if (sr == null)
+                {
+                    Debug.LogError("SpriteRendererがありません。", this);
+                    return;
+                }
+
+                sr.sprite = idb.Icon;
+            }
+
+            if (frame != null)
+            {
+                fsr = frame.GetComponent<SpriteRenderer>();
+                if (fsr != null)
+                {
+                    fsr.sprite = idb.Icon;
+                }
+            }
+            //Debug.Log(idb.Position.x);
+            if (!isTrap)
+            {
+                this.transform.position = new Vector3(idb.Position.x,transform.position.y,transform.position.z);
+                this.transform.localScale = idb.Size;
+            }
+            
+            cl = GetComponent<BoxCollider>();
+            if (cl != null)
+            {
+                cl.size = idb.ColliderSize;
+                cl.center = idb.ColliderCenterSize;
+                cl.isTrigger = false;
+            }
+            if (id != 9 && idb.Rotated)
+            {
+                GetComponent<Rigidbody>().constraints |= RigidbodyConstraints.FreezePositionY;
+                //GetComponent<Rigidbody>().isKinematic = true;
+            }
+            else
+            {
+                GetComponent<Rigidbody>().constraints &= ~RigidbodyConstraints.FreezePositionY;
+                //GetComponent<Rigidbody>().isKinematic = false;
+            }
+            isAttached = false;
+            EndAttack();
+            SetAnimatorEnabled(false);
+
+        }
+       
         isInitialized = true;
     }
 
@@ -170,6 +177,7 @@ public class ItemGimmick : MonoBehaviour {
         isAttached = false;
         isInitialized = true;
         isThrown = false;
+        EndAttack();
     }
 
     public void EmphasisItems(bool sw)
@@ -179,25 +187,35 @@ public class ItemGimmick : MonoBehaviour {
     }
     private void OnCollisionEnter(Collision collision)
     {
+        //Debug.Log("当たった");
         if(collision.gameObject.CompareTag("Player") && isTrap)
         {
-            int playerDamage = db.GetAttackById(id);
-            collision.gameObject.GetComponent<PlayerManager>().SetPlayerHp(playerDamage);
+            PlayerManager playerManager =
+                collision.gameObject.GetComponent<PlayerManager>();
+            
+
+            if (playerManager != null)
+            {
+                Debug.Log(trapDamage+"ダメージ与えます");
+                playerManager.SetPlayerHp(trapDamage);
+            }
         }
+
         if(collision.gameObject.CompareTag("Ground"))
         {
             Rigidbody rb = GetComponent<Rigidbody>();
             rb.constraints |= RigidbodyConstraints.FreezePositionY;
             rb.isKinematic = true;
         }
-        /*if (collision.gameObject.CompareTag("Enemy"))
-        {
-            int damage = db.GetAttackById(Id);
-            collision.gameObject.GetComponent<EnemyController>().SetEnemyHp(damage);
-            Debug.Log("敵に"+damage+"ダメージ");
-        }*/
-        
+        TryDamageEnemy(collision);
+
     }
+    private void OnCollisionStay(Collision collision)
+    {
+        TryDamageEnemy(collision);
+    }
+
+    
     
     private void OnCollisionExit(Collision collision)
     {
@@ -228,7 +246,23 @@ public class ItemGimmick : MonoBehaviour {
     public void SetAttach(bool isChecked)
     {
         isAttached = isChecked;
-        
+
+        if (cl == null)
+        {
+            cl = GetComponent<BoxCollider>();
+        }
+
+        if (cl != null)
+        {
+            cl.isTrigger = false;
+        }
+
+        if (!isAttached)
+        {
+            EndAttack();
+        }
+
+        SetAnimatorEnabled(isAttached && !isThrown);
     }
     public bool GetThrown()
     {
@@ -237,10 +271,62 @@ public class ItemGimmick : MonoBehaviour {
     public void SetThrown(bool isChecked)
     {
         isThrown = isChecked;
+        if (isThrown)
+        {
+            EndAttack();
+        }
+        SetAnimatorEnabled(isAttached && !isThrown);
+    }
+
+    public void BeginAttack()
+    {
+        if (!isAttached || isThrown)
+        {
+            return;
+        }
+
+        hitEnemies.Clear();
+        isAttacking = true;
+    }
+
+    public void EndAttack()
+    {
+        isAttacking = false;
+    }
+
+    private void TryDamageEnemy(Collision other)
+    {
+        if (!isAttached || !isAttacking || db == null)
+        {
+            return;
+        }
+
+        EnemyController enemy =
+            other.gameObject.GetComponentInParent<EnemyController>();
+
+        if (enemy == null || !enemy.CompareTag("Enemy"))
+        {
+            return;
+        }
+
+        if (!hitEnemies.Add(enemy))
+        {
+            return;
+        }
+
+        int damage = db.GetAttackById(id);
+        enemy.SetEnemyHp(damage);
         
     }
 
-    
+    private void SetAnimatorEnabled(bool isEnabled)
+    {
+        Animator itemAnimator = GetComponentInChildren<Animator>(true);
+        if (itemAnimator != null)
+        {
+            itemAnimator.enabled = isTrap || isEnabled;
+        }
+    }
 
 
 }

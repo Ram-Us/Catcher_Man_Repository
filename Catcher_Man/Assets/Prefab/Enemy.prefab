@@ -154,6 +154,7 @@ MonoBehaviour:
   enemyHp: 5
   enemyAttackDamage: 5
   db: {fileID: 11400000, guid: fcf926e7cc7a18146a7ed4d5305dd745, type: 2}
+  hitEffectPrefab: {fileID: 4748681987041982144, guid: aebfb8f69b249bb48b3466d23b0e3c50, type: 3}
 --- !u!1 &6789699088166604714
 GameObject:
   m_ObjectHideFlags: 0

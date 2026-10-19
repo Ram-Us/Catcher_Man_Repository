@@ -11,6 +11,7 @@ public class WeaponColliderController : MonoBehaviour
     [SerializeField] private float duration = 0.4f;
 
     private bool isSwinging;
+    public bool IsSwinging => isSwinging;
     private bool hasStartRotation;
     private Coroutine swingCoroutine;
     private Quaternion startRotation;

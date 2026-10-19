@@ -14,7 +14,10 @@ public enum ItemType
 
     RotatedBullet, //回る弾
 
-    HeavyObject     //重いオブジェクト
+    HeavyObject,     //重いオブジェクト
+
+    Item3D             //3Dアイテム
+
 
 }
 
@@ -26,49 +29,51 @@ public class Item
 
     [SerializeField] private Sprite icon;        // アイテムのアイコン画像
     public Sprite Icon => icon;
+
     [SerializeField] private ItemType itemType;  // アイテムの種類
     public ItemType ItemType => itemType;
+
     [SerializeField] private string itemName;    // アイテムの名前
     public string ItemName => itemName;
+
     [SerializeField] private int cost;    // 効果値
     public int Cost => cost;
-    [SerializeField] private Vector3 position = new Vector3(0f,0f,0f);  //アイテムのサイズ
+
+    [SerializeField] private Vector3 position = new Vector3(0f,0f,0f);  //アイテムの位置
     public Vector3 Position => position;
+
     [SerializeField] private Vector3 size = new Vector3(1f,1f,1f);  //アイテムのサイズ
     public Vector3 Size => size;
+
     [SerializeField] private float speed; //投げ時のスピード
     public float Speed => speed;
+
     [SerializeField] private int attack; //振り時のダメージ量
     public int Attack => attack;
 
     [SerializeField] private Vector3 colliderSize; //オブジェクトのコライダーのサイズ
     public Vector3 ColliderSize => colliderSize;
+
     [SerializeField] private Vector3 colliderCenterSize; //オブジェクトのコライダーのサイズ
     public Vector3 ColliderCenterSize => colliderCenterSize;
 
     [SerializeField] private GameObject instance;  //取得したアイテムのインスタンス
+    public GameObject Instance => instance;
 
     [SerializeField] private bool rotated = true;  //回転するか否か
     public bool Rotated => rotated;
 
-    [SerializeField] private Vector3 equippedItemScale;
+    [SerializeField] private Vector3 equippedItemScale;     //装備した際のオブジェクトの大きさ
     public Vector3 EquippedItemScale => equippedItemScale;
-    [SerializeField] private Vector3 equippedColliderSize; //オブジェクトのコライダーのサイズ
+
+    [SerializeField] private Vector3 equippedColliderSize; //装備した際のオブジェクトのコライダーのサイズ
     public Vector3 EquippedColliderSize => equippedColliderSize;
-    [SerializeField] private Vector3 equippedColliderCenter; //オブジェクトのコライダーのサイズ
+
+    [SerializeField] private Vector3 equippedColliderCenter; //装備した際のオブジェクトのコライダーの中心位置
     public Vector3 EquippedColliderCenter => equippedColliderCenter;
 
-    [SerializeField] private int[] rect;
+    [SerializeField] private int[] rect;                    //インベントリ内のアイテム画像のサイズ
     public int[] Rect => rect;
-
-
-    
-
-
-    public GameObject Instance => instance;
-
-     
-
 
 }
 

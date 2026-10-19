@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5203995104612446651}
   - component: {fileID: 4237256763513532243}
   - component: {fileID: 3696910717554907401}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: BaseItem
   m_TagString: Item
   m_Icon: {fileID: 0}
@@ -106,7 +106,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -156,6 +156,9 @@ MonoBehaviour:
   id: 0
   isAttached: 0
   isThrown: 0
+  isTrap: 0
+  isAttacking: 0
+  hitEffectPrefab: {fileID: 4748681987041982144, guid: aebfb8f69b249bb48b3466d23b0e3c50, type: 3}
 --- !u!1 &6223837661610117336
 GameObject:
   m_ObjectHideFlags: 0
