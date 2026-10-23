@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2308017059752092500}
   - component: {fileID: 2485160350860204023}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: GameObject
   m_TagString: Ground
   m_Icon: {fileID: 0}
@@ -63,7 +63,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5457134432910820691}
   - component: {fileID: 2584399638495134120}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: GameObject (1)
   m_TagString: Ground
   m_Icon: {fileID: 0}
@@ -117,7 +117,7 @@ GameObject:
   - component: {fileID: 6633023557716492427}
   - component: {fileID: 3082916837585573817}
   - component: {fileID: 1530497103367637045}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: arrow-basic-rounded
   m_TagString: Ground
   m_Icon: {fileID: 0}
@@ -172,7 +172,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -6538903991835684241, guid: e899fea151b7f83438c7faf2ad95b425, type: 3}
+  - {fileID: 2100000, guid: 9d3626085da849d4fa6683dfb927afb4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

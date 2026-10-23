@@ -188,7 +188,7 @@ public class MoveController : MonoBehaviour
         ItemGimmick item = other.GetComponentInParent<ItemGimmick>();
         ConveyorBelt conveyor = other.GetComponentInParent<ConveyorBelt>();
 
-        if (collision.gameObject.CompareTag("Ground") || item != null || conveyor != null)
+        if ((collision.gameObject.CompareTag("Ground")||collision.gameObject.CompareTag("MoveGround")) || item != null || conveyor != null)
         {
             bool standingOnTop = false;
             for (int i = 0; i < collision.contactCount; i++)

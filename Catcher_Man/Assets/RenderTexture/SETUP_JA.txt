@@ -1,0 +1,71 @@
+PixelGround: Unity 6000.0 / URP 17 / Render Graph ON
+
+対象
+・Windows PC、通常の単眼カメラ、Universal RendererのForward描画。
+・不透明でZWriteがONの3D地面。まずURP/LitのCubeで確認する。
+・2D Renderer、XR、Deferred向けの実装ではない。
+・Unity Editorをこの環境では実行できないため、実機検証は未実施。
+
+導入
+1. PixelGroundRendererFeature.csとPixelGroundComposite.shaderをAssetsへ入れる。
+2. ProjectでMaterialを作り、ShaderをCustom/PixelGroundCompositeにする。
+   このMaterialは地面へ貼らない。後述のRenderer Featureへ指定する。
+3. 前に追加した地面専用Cameraと、Render Texture表示用Raw Imageを無効にする。
+   他のUIや背景に使うRaw Imageまで無効にしない。
+4. Main CameraのOutput TextureをNoneに戻す。
+   Culling MaskではPixelGroundを含め、必要な対象をすべてONにする。
+5. 地面のMesh Rendererが付いたGameObjectのLayerをPixelGroundにする。
+   Groundタグは変更不要。新しいLayerとPlayer等の物理衝突設定も確認する。
+6. 使用中のURP AssetのRenderer Listから、Main Cameraが使う
+   Universal Renderer Dataを開く。
+   Main CameraのRendering > RendererでDefault以外を選んでいる場合は
+   そのRenderer Dataを編集する。
+7. Renderer DataのRendering PathをForwardにする。
+   Depth Priming ModeはDisabledにする。
+   初回確認時はURP AssetのMSAAをDisabled、Render Scaleを1、
+   Main CameraのAnti-aliasingをNoneにする。
+   Compatibility Mode (Render Graph Disabled)はOFFのまま。
+8. Renderer DataのFiltering > Opaque Layer MaskからPixelGroundを外す。
+   Main CameraのCulling Maskからは外さない。この違いが重要。
+   他の必要な不透明LayerはONのままにする。
+9. 同じRenderer DataのAdd Renderer Featureから
+   Pixel Ground Renderer Featureを追加する。
+10. Target LayersでPixelGroundだけを選ぶ。
+    Composite Materialに手順2のMaterialを指定する。
+    Resolution Heightを180にする。16:9なら約320x180で地面を描く。
+11. Gameビューで確認する。粗くするならHeightを90へ、細かくするなら360へ。
+
+実行の仕組み
+通常の不透明物体と背景を描いた後、PixelGroundだけを低解像度の
+色・深度テクスチャへ描く。両方をPointで拡大して合成し、画面の深度も更新する。
+その後に通常の透明Spriteやパーティクルが描かれ、地面との深度判定を行う。
+専用Camera、Canvas、手動で作るRender Textureは不要。
+Renderer FeatureはGameObjectにAdd Componentしない。
+
+主な設定
+Target Layers: 適用するGameObjectのLayer。
+Resolution Height: 地面用画像の縦の画素数。小さいほど粗い。
+Composite Material: 同梱Shaderを設定した合成用Material。
+Show In Scene View: Sceneビューでも適用するか。
+
+不具合の切り分け
+・地面が消えた: Shaderのコンパイルエラー、Target Layers、Material、
+  Renderer Dataの選択を確認。いったんOpaque Layer MaskのPixelGroundを
+  ONへ戻せば通常描画へ戻せる。
+・地面が滑らか: 通常描画が残っている可能性。Opaque Layer Maskと
+  ほかのCamera・以前のRaw Imageを確認する。
+・一部の地面だけ出ない: 子MeshのLayer、MaterialのRender Queueを確認。
+  この版は不透明Queueのみ。Transparent、ZWrite OFFは対象外。
+・lilToon等で出ない/見た目が違う: まずURP/LitのCubeで動作を確認する。
+  元Materialのパス、画面参照、特殊なシェーダー機能との互換性は個別検証が必要。
+・効果OFF: FeatureをOFFにするだけでは地面が消える。
+  Opaque Layer MaskのPixelGroundもONへ戻す。
+
+制限
+・元のマテリアルを再描画するため、不透明Forward描画パスが必要。
+・地面の輪郭も低解像度になるが、低解像度の深度は階段状になる。
+  プレイヤーの足元や斜面との境界で細かい段差が見える場合がある。
+・地面を通常の不透明パスから外すため、SSAO、スクリーンスペース反射、
+  深度・法線を利用する他Featureとの連携は別途調整が必要。
+・この版はMain Cameraが1台の構成を想定。Camera Stackの共存は別途検証する。
+・地面を低解像度化しても、配色やテクスチャを自動でドット絵には変えない。

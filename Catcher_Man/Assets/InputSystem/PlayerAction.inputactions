@@ -81,17 +81,6 @@
             ],
             "bindings": [
                 {
-                    "name": "",
-                    "id": "674f60be-99ad-49a5-9be3-8ce94de679e7",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
                     "name": "WASD",
                     "id": "61894978-1bbe-4cf5-8869-9a177bc4fbda",
                     "path": "2DVector",
@@ -114,17 +103,6 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "down",
-                    "id": "6454b622-450c-49aa-bc86-75c60de92bb3",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
                     "name": "left",
                     "id": "6385bc48-14b6-45d2-92c1-62b255de6b53",
                     "path": "<Keyboard>/a",
@@ -136,9 +114,31 @@
                     "isPartOfComposite": true
                 },
                 {
+                    "name": "Right",
+                    "id": "6181bc65-542f-49f3-ad15-51769d0e0906",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "5d749daa-b55f-483f-a5a7-8c3179848e0f",
+                    "path": "<SwitchProControllerHID>/leftStick/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "right",
                     "id": "8df0a64f-84f4-4c07-b63f-e41a29369742",
-                    "path": "<Keyboard>/d",
+                    "path": "<SwitchProControllerHID>/leftStick/right",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -159,8 +159,41 @@
                 },
                 {
                     "name": "",
+                    "id": "03beb197-dbb3-4d82-9352-600290e31865",
+                    "path": "<SwitchProControllerHID>/leftStick/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5d0244eb-33d5-45ca-bf77-f8ed8de6d61a",
+                    "path": "<SwitchProControllerHID>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "54107253-05a6-4722-8525-5d350615586d",
                     "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Catch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9d75b2ed-296f-4de4-afaf-df89b16e6ebb",
+                    "path": "<SwitchProControllerHID>/buttonEast",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -181,8 +214,30 @@
                 },
                 {
                     "name": "",
+                    "id": "142cde93-07a9-4a9f-b54c-2bb439c022ae",
+                    "path": "<Gamepad>/rightStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Search",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "d8e8f3c6-9f85-4bc0-8136-12e3955d8d44",
                     "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Put",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2f32a651-5cda-4fc5-a20f-8fa430998c2e",
+                    "path": "<SwitchProControllerHID>/rightTrigger",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -203,6 +258,17 @@
                 },
                 {
                     "name": "",
+                    "id": "51a18855-3c59-4ee0-b042-4edb3318bb4b",
+                    "path": "<SwitchProControllerHID>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Select",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "6e56155b-e4b0-45cb-8d40-7011ed2f0dad",
                     "path": "<Keyboard>/f",
                     "interactions": "",
@@ -214,8 +280,30 @@
                 },
                 {
                     "name": "",
+                    "id": "445c94ec-e47a-48cf-9c1f-feaf85052954",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Throw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "772bcffb-4b47-442d-8873-a9f30a920b35",
                     "path": "<Keyboard>/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Swing",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "103795c9-4404-4d16-ac94-e5d8761b7db1",
+                    "path": "<SwitchProControllerHID>/buttonNorth",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

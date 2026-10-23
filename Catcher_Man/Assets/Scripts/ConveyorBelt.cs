@@ -123,4 +123,12 @@ public class ConveyorBelt : MonoBehaviour
         beltSpeed = Mathf.Max(0f, beltSpeed);
         inputSpeedMultiplier = Mathf.Clamp01(inputSpeedMultiplier);
     }
+
+    private void OnCollisionEnter(Collision other) {
+        if (other.gameObject.CompareTag("Item"))
+        {
+            Rigidbody rb = other.gameObject.GetComponent<Rigidbody>();
+            rb.constraints &= ~RigidbodyConstraints.FreezePositionY;
+        }
+    }
 }

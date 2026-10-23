@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8691906873063089859}
   - component: {fileID: 4677204998211688376}
   - component: {fileID: 3147166827067340626}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: button-floor-square
   m_TagString: Ground
   m_Icon: {fileID: 0}
@@ -139,7 +139,7 @@ GameObject:
   - component: {fileID: 4717212718901965611}
   - component: {fileID: 2503285740881076501}
   - component: {fileID: 7127466312956382391}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: button
   m_TagString: Ground
   m_Icon: {fileID: 0}

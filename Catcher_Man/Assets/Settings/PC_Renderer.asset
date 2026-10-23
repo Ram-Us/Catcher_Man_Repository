@@ -26,14 +26,15 @@ MonoBehaviour:
     probeVolumeBlendStatesCS: {fileID: 7200000, guid: b9a23f869c4fd45f19c5ada54dd82176, type: 3}
   m_RendererFeatures:
   - {fileID: 7833122117494664109}
-  m_RendererFeatureMap: ad6b866f10d7b46c
+  - {fileID: 7247909015299020447}
+  m_RendererFeatureMap: ad6b866f10d7b46c9fd63f2dd9be9564
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   m_AssetVersion: 2
   m_OpaqueLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 1527
   m_TransparentLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -70,6 +71,25 @@ MonoBehaviour:
     m_Bits: 4294967295
   backgroundColor: {r: 0.9037736, g: 0.99878645, b: 1, a: 1}
   downsample: 4
+--- !u!114 &7247909015299020447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea0f6520af09b8443abb2db1624a94e9, type: 3}
+  m_Name: PixelGroundRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 2048
+  resolutionHeight: 125
+  compositeMaterial: {fileID: 2100000, guid: 787032a54c73cdc46885f986a3922a1c, type: 2}
+  showInSceneView: 1
 --- !u!114 &7833122117494664109
 MonoBehaviour:
   m_ObjectHideFlags: 0
