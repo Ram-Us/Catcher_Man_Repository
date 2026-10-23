@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 4239852392366802257}
   - component: {fileID: -8729007493825369927}
   - component: {fileID: 2823003049532706196}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: conveyor-bars-stripe-side
-  m_TagString: Ground
+  m_TagString: MoveGround
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -122,5 +122,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerTag: Player
+  ItemTag: Item
   beltSpeed: 2
   inputSpeedMultiplier: 0.5

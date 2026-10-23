@@ -182,7 +182,11 @@ public class ItemGimmick : MonoBehaviour {
 
     public void EmphasisItems(bool sw)
     {
-        frame.SetActive(sw);
+        if(id != -1)
+        {
+            frame.SetActive(sw);
+        }
+        
         
     }
     private void OnCollisionEnter(Collision collision)

@@ -568,7 +568,7 @@ public class ActionController : MonoBehaviour
         // ID6だけZ軸を140度傾ける。それ以外は0度。
         weaponRotationZ = selectedItemId == 6 ? 140f : 0f;
 
-        Debug.Log(weaponRotationZ);
+        //Debug.Log(weaponRotationZ);
         // 空のスロットなら武器を隠す
         if (selectedItemId <= 0)
         {

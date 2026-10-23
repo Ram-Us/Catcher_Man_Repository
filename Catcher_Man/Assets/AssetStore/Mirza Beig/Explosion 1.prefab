@@ -26,11 +26,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7522982781472501600, guid: 017c9fcd02ca72049806a4014da0bea6, type: 3}
       propertyPath: startDelay.scalar
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7522982781472501600, guid: 017c9fcd02ca72049806a4014da0bea6, type: 3}
       propertyPath: InitialModule.startSize.scalar
-      value: 20
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 7522982781472501600, guid: 017c9fcd02ca72049806a4014da0bea6, type: 3}
       propertyPath: SubModule.subEmitters.Array.data[0].emitter

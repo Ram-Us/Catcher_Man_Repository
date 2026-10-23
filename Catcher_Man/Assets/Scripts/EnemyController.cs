@@ -50,9 +50,10 @@ public class EnemyController : MonoBehaviour
 
                 GameObject pre = Instantiate(
                     hitEffectPrefab,
-                    contact.point,
+                    hitEffectPrefab.transform.localEulerAngles,
                     Quaternion.LookRotation(contact.normal)
                 );
+                Debug.Log(pre.transform.position);
                 Destroy(pre);
             }
             

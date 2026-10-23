@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 410362}
   - component: {fileID: 3334306}
   - component: {fileID: 2325438}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Fort01_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ GameObject:
   - component: {fileID: 5891799820126343427}
   - component: {fileID: 2907731528266261368}
   - component: {fileID: 147295460464843387}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Plane
   m_TagString: Ground
   m_Icon: {fileID: 0}

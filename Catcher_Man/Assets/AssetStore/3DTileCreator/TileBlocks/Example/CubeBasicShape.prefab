@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4747456476297551043}
   - component: {fileID: 14205075128745916}
   - component: {fileID: -3772940751763358855}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: CubeBasicShape
   m_TagString: Ground
   m_Icon: {fileID: 0}
@@ -65,8 +65,8 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 2ad85dfe2430c9944a67aabf28740c2d, type: 2}
-  - {fileID: 2100000, guid: ae29ac02d08992344b9095971167e1c6, type: 2}
+  - {fileID: 2100000, guid: 57900674ab9fa6e4eaeb61fbec631ce4, type: 2}
+  - {fileID: 2100000, guid: 69a5aa4f82e2b9d469a764178cdaca16, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
