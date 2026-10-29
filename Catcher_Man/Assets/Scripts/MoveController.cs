@@ -14,6 +14,18 @@ public class MoveController : MonoBehaviour
     private ActionController actionController;
     private InputAction moveAction;
     private InputAction jumpAction;
+    private InputAction crouchAction;
+    [Header("しゃがみ（本体のBoxCollider）")]
+    [SerializeField] private BoxCollider bodyCollider;
+    [SerializeField, Range(0.1f, 1f)] private float crouchHeightRatio = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float crouchMoveMultiplier = 0.5f;
+    [SerializeField] private LayerMask standBlockingLayers = ~0;
+    private Vector3 standingSize, standingCenter;
+    private bool crouchHeld, crouchJump;
+    private float crouchJumpTime;
+    public bool IsCrouching { get; private set; }
+    public bool IsCrouchJumping => crouchJump;
+    public event System.Action Jumped;
     private readonly HashSet<Collider> supportContacts = new();
     private readonly HashSet<Collider> ladderContacts = new();
     private readonly HashSet<Collider> conveyorContacts = new();
@@ -26,6 +38,8 @@ public class MoveController : MonoBehaviour
     private bool wasClimbing;
     [SerializeField] private bool isGround;
     [SerializeField] private bool isTouchingLadder;
+    public bool IsGrounded => isGround;
+    public bool IsClimbing => wasClimbing;
 
     private void Awake()
     {
@@ -33,6 +47,15 @@ public class MoveController : MonoBehaviour
         actionController = GetComponent<ActionController>();
         moveAction = InputSystem.actions.FindAction("Move");
         jumpAction = InputSystem.actions.FindAction("Jump");
+        crouchAction = InputSystem.actions.FindAction("Crouch");
+        if (bodyCollider == null) bodyCollider = GetComponent<BoxCollider>();
+        if (bodyCollider != null)
+        {
+            standingSize = bodyCollider.size;
+            standingCenter = bodyCollider.center;
+        }
+        else Debug.LogError("しゃがみ用の本体BoxColliderを設定してください。", this);
+        if (crouchAction == null) Debug.LogWarning("Input ActionsにCrouchを追加してください。", this);
         jumpRequested = false;
         jumpHeld = false;
         wasClimbing = false;
@@ -47,6 +70,11 @@ public class MoveController : MonoBehaviour
         moveAction.canceled += OnMoveCanceled;
         jumpAction.started += OnJump;
         jumpAction.canceled += OnJumpCanceled;
+        if (crouchAction != null)
+        {
+            crouchAction.performed += OnCrouch;
+            crouchAction.canceled += OnCrouchCanceled;
+        }
     }
 
     private void OnDisable()
@@ -55,6 +83,16 @@ public class MoveController : MonoBehaviour
         moveAction.canceled -= OnMoveCanceled;
         jumpAction.started -= OnJump;
         jumpAction.canceled -= OnJumpCanceled;
+        if (crouchAction != null)
+        {
+            crouchAction.performed -= OnCrouch;
+            crouchAction.canceled -= OnCrouchCanceled;
+        }
+        crouchHeld = false;
+        jumpHeld = false;
+        jumpRequested = false;
+        crouchJump = false;
+        // 天井の下で無効化された場合にも、無理に立ち上がらない。
         
         supportContacts.Clear();
         ladderContacts.Clear();
@@ -95,6 +133,13 @@ public class MoveController : MonoBehaviour
             jumpConsumed = false;
         }
 
+        if (crouchJump)
+        {
+            crouchJumpTime += Time.fixedDeltaTime;
+            if (crouchJumpTime > 0.15f && isGround && rb.linearVelocity.y <= 0.1f)
+                crouchJump = false;
+        }
+        UpdateCrouch();
         Move();
 
         bool jumpedThisStep = jumpRequested && isGround && !jumpConsumed;
@@ -106,7 +151,7 @@ public class MoveController : MonoBehaviour
         // startedは一度だけ処理する。着地後まで入力要求を持ち越さない。
         jumpRequested = false;
 
-        bool climbing = isTouchingLadder && jumpHeld && !jumpedThisStep;
+        bool climbing = isTouchingLadder && jumpHeld && !jumpedThisStep && !IsCrouching;
         if (climbing)
         {
             Vector3 velocity = rb.linearVelocity;
@@ -160,20 +205,70 @@ public class MoveController : MonoBehaviour
             conveyorSpeed = Mathf.Max(conveyorSpeed, conveyor.BeltSpeed);
             inputSpeedMultiplier = Mathf.Min(inputSpeedMultiplier, conveyor.InputSpeedMultiplier);
         }
-        velocity.z = moveInput * moveSpeed * inputSpeedMultiplier - conveyorSpeed;
+        velocity.z = moveInput * moveSpeed * inputSpeedMultiplier * (IsCrouching ? crouchMoveMultiplier : 1f) - conveyorSpeed;
         velocity.x = 0f;
         rb.linearVelocity = velocity;
     }
 
+    private void OnCrouch(InputAction.CallbackContext context) => crouchHeld = true;
+    private void OnCrouchCanceled(InputAction.CallbackContext context) => crouchHeld = false;
+
+    private void UpdateCrouch()
+    {
+        if (bodyCollider == null) return;
+        bool crouching = crouchHeld || crouchJump;
+        if (!crouching && IsCrouching && !CanStand()) crouching = true;
+        if (crouching == IsCrouching) return;
+        IsCrouching = crouching;
+        Vector3 size = standingSize;
+        Vector3 center = standingCenter;
+        if (crouching)
+        {
+            size.y *= crouchHeightRatio;
+            // 足元の高さを変えずに上半分を縮める。
+            center.y -= (standingSize.y - size.y) * 0.5f;
+        }
+        bodyCollider.size = size;
+        bodyCollider.center = center;
+    }
+
+    private bool CanStand()
+    {
+        Transform body = bodyCollider.transform;
+        // 立つと増える頭上部分のみ調べる。床は判定に含めない。
+        float currentTop = bodyCollider.center.y + bodyCollider.size.y * 0.5f;
+        float standingTop = standingCenter.y + standingSize.y * 0.5f;
+        float height = standingTop - currentTop;
+        if (height <= 0.001f) return true;
+        Vector3 center = standingCenter;
+        center.y = currentTop + height * 0.5f;
+        Vector3 scale = body.lossyScale;
+        scale = new Vector3(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z));
+        Vector3 half = Vector3.Scale(new Vector3(standingSize.x, height, standingSize.z) * 0.5f, scale);
+        half = Vector3.Max(half - Vector3.one * 0.005f, Vector3.one * 0.001f);
+        foreach (Collider hit in Physics.OverlapBox(body.TransformPoint(center), half,
+                     body.rotation, standBlockingLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (hit == bodyCollider || hit.attachedRigidbody == rb ||
+                hit.transform.IsChildOf(transform)) continue;
+            return false;
+        }
+        return true;
+    }
+
     private void Jump()
     {
+        crouchJump = IsCrouching;
+        crouchJumpTime = 0f;
         Vector3 velocity = rb.linearVelocity;
         velocity.y = jumpPower;
         rb.linearVelocity = velocity;
+        Jumped?.Invoke();
     }
 
     private void OnCollisionEnter(Collision collision)
     {
+        //Debug.Log(collision.gameObject+"と衝突");
         UpdateContacts(collision);
     }
 
@@ -190,6 +285,7 @@ public class MoveController : MonoBehaviour
 
         if ((collision.gameObject.CompareTag("Ground")||collision.gameObject.CompareTag("MoveGround")) || item != null || conveyor != null)
         {
+            jumpConsumed = false;
             bool standingOnTop = false;
             for (int i = 0; i < collision.contactCount; i++)
             {

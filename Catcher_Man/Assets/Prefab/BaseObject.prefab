@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4237256763513532243}
   - component: {fileID: 3696910717554907401}
   - component: {fileID: 6691984461405076513}
-  m_Layer: 8
+  m_Layer: 12
   m_Name: BaseObject
   m_TagString: Object
   m_Icon: {fileID: 0}
@@ -154,10 +154,12 @@ MonoBehaviour:
   frame: {fileID: 0}
   db: {fileID: 11400000, guid: fcf926e7cc7a18146a7ed4d5305dd745, type: 2}
   id: 0
+  trapDamage: 0
   isAttached: 0
   isThrown: 0
   isTrap: 0
   isAttacking: 0
+  isCollidedItem: 0
 --- !u!95 &6691984461405076513
 Animator:
   serializedVersion: 7

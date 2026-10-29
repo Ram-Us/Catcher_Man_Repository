@@ -22,6 +22,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
     [SerializeField] private bool isGrounded = false,isColided = false,ShooterType = false;
     private bool leapRequested = false;
     private bool isAttacking;
+    private Animator anim;
 
     void Awake()
     {
@@ -29,6 +30,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
         currentState = EnemyState.Idle;
         rb = GetComponent<Rigidbody>();
         currentTimer = coolDownTimer;
+        anim = GetComponent<Animator>();
 
     }
 
@@ -45,6 +47,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
                 {   
                     //Debug.Log("チェイスへ");
                     currentState = EnemyState.Chase;
+                    anim.SetTrigger("Chase");
                     
                 }
 
@@ -54,14 +57,17 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
                 if(currentDistance < battleDistance)
                 {
                     //Debug.Log("バトルへ");
+                    anim.SetTrigger("Leap");
                     currentState = EnemyState.Leap;
                     leapRequested = true;
+                    
                     
                 }
                 else if(currentDistance > idleDistance)
                 {
                     //Debug.Log("アイドルへ");
                     currentState = EnemyState.Idle;
+                    anim.SetTrigger("Idle");
                 }
 
                 break;
@@ -71,11 +77,13 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
                 if (!leapRequested)
                 {
                     currentState = EnemyState.Cooldown;
+                    anim.SetTrigger("Idle");
                 }
                 if(currentDistance > battleDistance)
                 {
                     //Debug.Log("チェイスへ");
                     currentState = EnemyState.Chase;
+                    anim.SetTrigger("Chase");
                 }
                 break;
             
@@ -90,10 +98,12 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
                         {
                             //Debug.Log("アイドルへ");
                             currentState = EnemyState.Idle;
+                            anim.SetTrigger("Idle");
                         }
                         else
                         {
                             currentState = EnemyState.Chase;
+                            anim.SetTrigger("Chase");
                         }
                         currentTimer = coolDownTimer;
                         
@@ -108,6 +118,14 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
 
     void FixedUpdate()
     {
+        float direction = Math.Sign(player.position.z - transform.position.z);
+        if(direction <= -1)
+        {
+            transform.eulerAngles = new Vector3 (0f,90f,0f);
+        }else if(direction >= 1)
+        {
+            transform.eulerAngles = new Vector3 (0f,270f,0f);
+        }
         switch (currentState)
         {
             
@@ -118,7 +136,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
                 break;
             case EnemyState.Chase:
                 currentSpeed = chaseSpeed;
-                float direction = Math.Sign(player.position.z - transform.position.z);
+                direction = Math.Sign(player.position.z - transform.position.z);
                 Vector3 velocity =  rb.linearVelocity;
                 velocity.z = direction * currentSpeed;
                 velocity.x = 0;
@@ -137,6 +155,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
                     }
                     else if (currentDistance > battleDistance)
                     {
+                        anim.SetTrigger("Chase");
                         currentState = EnemyState.Chase;
                     }
                 }
@@ -184,7 +203,13 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
 
     private void OnCollisionStay(Collision collision)
     {
-        TryDamagePlayer(collision.gameObject);
+        
+        if(collision.gameObject.CompareTag("Player") && CurrentStateCode == 2)
+        {
+            Debug.Log("当たり続けてるよ");
+            TryDamagePlayer(collision.gameObject);
+        }
+        
     }
 
     private void TryDamagePlayer(GameObject target)
@@ -200,7 +225,6 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
             Debug.LogWarning("PlayerタグのオブジェクトにPlayerManagerがありません。", target);
             return;
         }
-
         playerManager.SetPlayerHp(enemyData.EnemyAttackDamage);
         isColided = true;
     }

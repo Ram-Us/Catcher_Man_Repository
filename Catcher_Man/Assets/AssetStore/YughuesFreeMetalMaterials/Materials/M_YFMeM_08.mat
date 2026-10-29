@@ -8,14 +8,10 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: M_YFMeM_08
-  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_Shader: {fileID: 4800000, guid: efa77a80ca0344749b4f19fdd5891cbe, type: 3}
   m_Parent: {fileID: 2100000, guid: d5c2611926b334e488e131369218f292, type: 2}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - _METALLICSPECGLOSSMAP
-  - _NORMALMAP
-  - _SPECGLOSSMAP
-  - _SPECULAR_SETUP
+  m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -29,15 +25,27 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _BaseMap:
+    - _BaseColorMap:
         m_Texture: {fileID: 2800000, guid: 640ee290d9cbc4b4685c85ef0d50ea60, type: 3}
         m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: 640ee290d9cbc4b4685c85ef0d50ea60, type: 3}
+        m_Scale: {x: 52.33, y: 55.09}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 2800000, guid: 2ee180c070da9554385c5a088aae062e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 640ee290d9cbc4b4685c85ef0d50ea60, type: 3}
+        m_Scale: {x: 52.33, y: 55.09}
+        m_Offset: {x: 0, y: 0}
+    - _OutlineTex:
+        m_Texture: {fileID: 2800000, guid: 640ee290d9cbc4b4685c85ef0d50ea60, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ReflectionColorTex:
         m_Texture: {fileID: 2800000, guid: 640ee290d9cbc4b4685c85ef0d50ea60, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -46,8 +54,75 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats: []
-    m_Colors: []
+    m_Floats:
+    - _AlphaToMask: 0
+    - _ApplyReflection: 1
+    - _BackfaceForceShadow: 0
+    - _BacklightBlur: 0.02
+    - _BacklightBorder: 0.19999999
+    - _BumpScale: -2.7
+    - _Cull: 0
+    - _Cutoff: 0.5
+    - _DstBlend: 0
+    - _DstBlendAlpha: 10
+    - _EmissionMainStrength: 0
+    - _EmissionUseGrad: 0
+    - _EnvRimBlur: 0.562
+    - _FlipNormal: 0
+    - _GSAAStrength: 0
+    - _Metallic: 0.644
+    - _OutlineEnableLighting: 1
+    - _OutlineFixWidth: 1
+    - _OutlineLitApplyTex: 0
+    - _OutlineLitShadowReceive: 0
+    - _OutlineVertexR2Width: 0
+    - _OutlineWidth: 1
+    - _OutlineZTest: 2
+    - _Reflectance: 1
+    - _RimBackfaceMask: 1
+    - _RimBlur: 0.1
+    - _RimBorder: 0.5
+    - _RimFresnelPower: 3
+    - _RimShadeBorder: 0.431
+    - _RimShadeNormalStrength: 1
+    - _RimShadowMask: 0
+    - _RimVRParallaxStrength: 0
+    - _Shadow2ndBlur: 0.3
+    - _Shadow2ndBorder: 0.5
+    - _ShadowBlur: 0.25
+    - _ShadowBorder: 0.5
+    - _ShadowBorderRange: 0
+    - _ShadowMainStrength: 1
+    - _ShadowStrength: 0.5
+    - _Smoothness: 0.95
+    - _SpecularBlur: 0.369
+    - _SpecularBorder: 0.569
+    - _SpecularNormalStrength: 0.886
+    - _SpecularToon: 0
+    - _UseAnisotropy: 0
+    - _UseBacklight: 0
+    - _UseBumpMap: 1
+    - _UseEmission: 0
+    - _UseMain2ndTex: 0
+    - _UseReflection: 1
+    - _UseRim: 0
+    - _UseRimShade: 1
+    - _UseShadow: 1
+    m_Colors:
+    - _BacklightColor: {r: 1, g: 0.77688086, b: 0.020754695, a: 1}
+    - _BaseColor: {r: 0.88594186, g: 0.96259344, b: 0.9802698, a: 1}
+    - _Color: {r: 0.88594186, g: 0.96259344, b: 0.9802698, a: 1}
+    - _Color2nd: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _MainTexHSVG: {r: 0, g: 1, b: 1, a: 1}
+    - _OutlineColor: {r: 0.9, g: 0.6, b: 0.6, a: 1}
+    - _OutlineLitColor: {r: 0, g: 0, b: 0, a: 0.2509804}
+    - _OutlineTexHSVG: {r: 0, g: 1, b: 1, a: 2}
+    - _ReflectionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _RimColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Shadow2ndColor: {r: 0.73, g: 0.3899998, b: 0.3699998, a: 0}
+    - _ShadowBorderColor: {r: 1, g: 0, b: 0, a: 1}
+    - _ShadowColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &3441193574619730452

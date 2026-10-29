@@ -5,7 +5,7 @@ using TMPro;
 public class SlotController : MonoBehaviour
 {
     [SerializeField] private List<Image> slotItem = new ();
-    private int[] stockCount={0,0,0,0};
+    [SerializeField] private int[] stockCount={0,0,0,0};
     public int[] StockCount => stockCount;
     [SerializeField] private Sprite baseSprite;
     private SpriteRenderer sr;
@@ -42,18 +42,22 @@ public class SlotController : MonoBehaviour
                 {
                     if (itemId == 9)
                     {
-                     SItem.sprite = dataBase.GetSpriteById(itemId);
-                    }else if (itemId == 7)
-                    {
-                        GameObject ironBall = getItem.transform.GetChild(0).gameObject;
-                        sr = ironBall.GetComponent<SpriteRenderer>();
+                        SItem.sprite = dataBase.GetSpriteById(itemId);
                     }
                     else
                     {
-                        
-                        sr = getItem.GetComponent<SpriteRenderer>();
+                        if (itemId == 7)
+                        {
+                            GameObject ironBall = getItem.transform.GetChild(0).gameObject;
+                            sr = ironBall.GetComponent<SpriteRenderer>();
+                        }
+                        else
+                        {
+                            sr = getItem.GetComponent<SpriteRenderer>();
+                        }
+
+                        SItem.sprite = sr.sprite;
                     }
-                    SItem.sprite = sr.sprite;
                 }
                 RectTransform rect = SItem.rectTransform;
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,dataBase.GetWidthById(itemId));

@@ -37,9 +37,9 @@ public class ShootEnemyContorller : MonoBehaviour
         }
 
         float direction = gameObject.GetComponent<IEnemyProvider>().DirectionToPlayer;
-        Vector3 pivotPosition = bulletPivot.position;
-        pivotPosition.z =transform.position.z +direction * 1f;
-        bulletPivot.position = pivotPosition;
+        //Vector3 pivotPosition = bulletPivot.position;
+        //pivotPosition.z =transform.position.z +direction * 1f;
+       //bulletPivot.position = pivotPosition;
 
         bullet = Instantiate(preBullet, bulletPivot.transform.position, Quaternion.Euler(0f,90f,0f));
 

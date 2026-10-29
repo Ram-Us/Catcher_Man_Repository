@@ -35,7 +35,7 @@ public class CinemachineController : MonoBehaviour
         if(other.gameObject.name == "TestPlayer")
         {
             isInside = true;
-            Debug.Log(other.gameObject.name);
+            //Debug.Log(other.gameObject.name);
         }
     }
     private void OnTriggerStay(Collider other)

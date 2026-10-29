@@ -34,7 +34,7 @@ public class ItemLane : MonoBehaviour
             Rigidbody rb = pre.GetComponent<Rigidbody>();
             rb.constraints &= ~RigidbodyConstraints.FreezePositionY;
             
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(10f);
             
         }
         yield return null;

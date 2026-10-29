@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5203995104612446651}
   - component: {fileID: 4237256763513532243}
   - component: {fileID: 3696910717554907401}
-  m_Layer: 8
+  m_Layer: 12
   m_Name: BaseItem3
   m_TagString: Item
   m_Icon: {fileID: 0}
@@ -154,11 +154,12 @@ MonoBehaviour:
   frame: {fileID: 6223837661610117336}
   db: {fileID: 11400000, guid: fcf926e7cc7a18146a7ed4d5305dd745, type: 2}
   id: 0
+  trapDamage: 0
   isAttached: 0
   isThrown: 0
   isTrap: 0
   isAttacking: 0
-  hitEffectPrefab: {fileID: 4748681987041982144, guid: aebfb8f69b249bb48b3466d23b0e3c50, type: 3}
+  isCollidedItem: 0
 --- !u!1 &6223837661610117336
 GameObject:
   m_ObjectHideFlags: 0
@@ -169,7 +170,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8276892721011210273}
   - component: {fileID: 8111386233884344032}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: TestFrame
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -91,6 +91,15 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
 
     void FixedUpdate()
     {
+
+        float direction = Math.Sign(player.position.z - transform.position.z);
+        if(direction <= -1)
+        {
+            transform.eulerAngles = new Vector3 (0f,90f,0f);
+        }else if(direction >= 1)
+        {
+            transform.eulerAngles = new Vector3 (0f,270f,0f);
+        }
         switch (currentState)
         {
             
@@ -101,7 +110,7 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
                 break;
             case EnemyState.Chase:
                 currentSpeed = chaseSpeed;
-                float direction = Math.Sign(player.position.z - transform.position.z);
+                direction = Math.Sign(player.position.z - transform.position.z);
                 Vector3 velocity =  rb.linearVelocity;
                 velocity.z = direction * currentSpeed;
                 velocity.x = 0;
@@ -122,7 +131,7 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
                 velocity.x = 0;
                 rb.linearVelocity = velocity;
                 Debug.Log(direction);
-                Debug.Log("今"+currentSpeed+"で"+battleDistance+"になるまで走行中");
+                //Debug.Log("今"+currentSpeed+"で"+battleDistance+"になるまで走行中");
                 break;
         }
     }

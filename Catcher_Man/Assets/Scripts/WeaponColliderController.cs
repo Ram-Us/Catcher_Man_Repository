@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using System;
 
 public class WeaponColliderController : MonoBehaviour
 {
@@ -68,6 +69,7 @@ public class WeaponColliderController : MonoBehaviour
 
         swingCoroutine = StartCoroutine(SwingRoutine());
     }
+        
 
     private IEnumerator SwingRoutine()
     {
@@ -78,6 +80,7 @@ public class WeaponColliderController : MonoBehaviour
         hasStartRotation = true;
 
         float elapsedTime = 0f;
+       
 
         while (elapsedTime < duration)
         {
@@ -106,6 +109,8 @@ public class WeaponColliderController : MonoBehaviour
 
         isSwinging = false;
         swingCoroutine = null;
+        yield return new WaitForSeconds(2.0f);
+        
     }
 
     public void StopSwing()
