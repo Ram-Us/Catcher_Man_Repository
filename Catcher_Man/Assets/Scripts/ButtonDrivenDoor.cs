@@ -47,6 +47,8 @@ public class ButtonDrivenDoor : MonoBehaviour
         }
 
         bool pressed = button.IsPressed;
+        // 往復モードで押されている間だけ、ボタンの押下姿勢を保持する。
+        button.SetHoldPressedPose(mode == DoorMode.OscillateWhilePressed);
         bool justPressed = pressed && !wasPressed;
 
         switch (mode)

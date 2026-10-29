@@ -28,7 +28,7 @@ public class BossController : MonoBehaviour,IEnemyProvider
     [SerializeField] private int random;
     private Rigidbody rb;
     [SerializeField]private Animator anim;
-    [SerializeField] private bool isGrounded = false,isShoot = false,isSpeciealized = true,isStopped,isSpecialStarted = false,isSpecialShot = false;
+    [SerializeField] private bool isGrounded = false,isShoot = false,isSpeciealized = true,isStopped,isSpecialStarted = false,isSpecialShot = false,isBattled = false;
     public bool IsSpecialized => isSpeciealized;
     private bool isAttacking;
     private bool hasDamagedThisAttack;
@@ -286,7 +286,7 @@ public class BossController : MonoBehaviour,IEnemyProvider
     {
         if (!depthAttackLocked &&
             currentState != EnemyState.DepthAttack &&
-            currentState != EnemyState.Defeat)
+            currentState != EnemyState.Defeat && isBattled)
         {
             specialTimer -= Time.fixedDeltaTime;
             if (specialTimer <= 0f)
@@ -517,6 +517,7 @@ public class BossController : MonoBehaviour,IEnemyProvider
 
             if (currentGearHits >= requiredGearHits)
             {
+                Debug.Log("武器落します");
                 LockDepthAttackAndDropItem();
             }
         }
@@ -665,7 +666,19 @@ public class BossController : MonoBehaviour,IEnemyProvider
     }
 
     
-    
+    public int CurrentStateCode
+    {
+        get
+        {
+            return currentState switch
+            {
+                EnemyState.Idle     => 0,
+                EnemyState.Move    => 1,
+                EnemyState.MeleeAttack   => 2,
+                _ => -1
+            };
+        }
+    }
     public float DirectionToPlayer
     {
         get

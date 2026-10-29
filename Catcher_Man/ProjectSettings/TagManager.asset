@@ -17,16 +17,16 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - TriggerWall
   - Water
   - UI
   - Nova
   - EnemyBody
-  - PlayerAttack
-  - 
+  - AttackWeapon
+  - EquippedWeapon
   - PlayerBody
   - PixelGround
-  - 
+  - WorldItem
   - 
   - 
   - 

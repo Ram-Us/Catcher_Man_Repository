@@ -34,7 +34,7 @@ MonoBehaviour:
   m_AssetVersion: 2
   m_OpaqueLayerMask:
     serializedVersion: 2
-    m_Bits: 1527
+    m_Bits: 6135
   m_TransparentLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -87,7 +87,7 @@ MonoBehaviour:
   targetLayers:
     serializedVersion: 2
     m_Bits: 2048
-  resolutionHeight: 125
+  resolutionHeight: 167
   compositeMaterial: {fileID: 2100000, guid: 787032a54c73cdc46885f986a3922a1c, type: 2}
   showInSceneView: 1
 --- !u!114 &7833122117494664109

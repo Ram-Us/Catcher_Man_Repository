@@ -1,6 +1,7 @@
 using UnityEngine;
-using System.Collections.Generic;
+using System.Collections;
 using System;
+using Unity.VisualScripting;
 public class EnemyController : MonoBehaviour
 {
 
@@ -8,59 +9,26 @@ public class EnemyController : MonoBehaviour
     public int EnemyHp => enemyHp;
     public int EnemyAttackDamage => enemyAttackDamage;
 
-    [SerializeField] private ItemDataBase db;
-    [SerializeField] private GameObject hitEffectPrefab;
 
-
-    
-
-    private void OnCollisionEnter(Collision collision)
+    void FixedUpdate()
     {
-        // ボスのHP・撃破・特殊武器解除はBossController側で一元管理する。
-        // ここでも処理すると二重ダメージや即Destroyが発生するため、通常敵だけ処理する。
-        if (TryGetComponent<BossController>(out _))
+        if(enemyHp <= 0)
         {
-            return;
+            Destroy(this.gameObject);
+            Debug.Log("敵撃破");
         }
 
-        ItemGimmick item = collision.gameObject.GetComponent<ItemGimmick>();
-        if(collision.gameObject.CompareTag("Item") &&(item.GetThrown() || item.IsAttached) )
-        {   
-            int id = item.Id;
-            int playerDamage = db.GetAttackById(id);
-            Debug.Log(enemyHp +"<"+ playerDamage);
-            if(enemyHp < playerDamage)
-            {
-                Destroy(this.gameObject);
-                Debug.Log("敵撃破");
-            }
-            else
-            {
-                enemyHp -= playerDamage;
-                Debug.Log("HPを"+playerDamage+"減らしたよ");
-            }
-            if (item.GetThrown())
-            {
-                Destroy(collision.gameObject);
-            }
-            if (hitEffectPrefab != null &&
-            collision.contactCount > 0)
-            {
-                ContactPoint contact = collision.GetContact(0);
-
-                GameObject pre = Instantiate(
-                    hitEffectPrefab,
-                    hitEffectPrefab.transform.localEulerAngles,
-                    Quaternion.LookRotation(contact.normal)
-                );
-                Debug.Log(pre.transform.position);
-                Destroy(pre);
-            }
-            
-        }
     }
+
+
+
+
+
+
+
     public void SetEnemyHp(int damage)
     {
         enemyHp -= damage;
     }
+    
 }

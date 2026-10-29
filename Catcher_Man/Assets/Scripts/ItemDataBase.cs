@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 
 // アイテムの種類を表す列挙型
@@ -105,6 +106,17 @@ public class ItemDataBase : ScriptableObject
             }
         }
         return null;
+    }
+    public Vector3 GetPositionById(int id)
+    {
+        foreach (var item in items)
+        {
+            if (item.Id == id)
+            {
+                return item.Position;
+            }
+        }
+        return new Vector3(0f,0f,0f);
     }
     public Sprite GetSpriteById(int id)
     {

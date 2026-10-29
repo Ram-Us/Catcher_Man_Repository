@@ -7,38 +7,37 @@ public class ButtonSensorRelay : MonoBehaviour
     [SerializeField] private ButtonPressGimmick button;
 
     private readonly HashSet<Collider> contacts = new();
+    private int sourceId;
 
     private void Awake()
     {
+        sourceId = GetInstanceID();
         if (button == null)
         {
             button = GetComponentInParent<ButtonPressGimmick>();
         }
-
         if (button == null)
         {
             Debug.LogError("親オブジェクトにButtonPressGimmickがありません。", this);
         }
-
-        if (GetComponent<Collider>().isTrigger)
-        {
-            Debug.LogError("ボタンのColliderはIs Triggerを無効にしてください。", this);
-        }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    
+
+    // Triggerでも通常Colliderでも検出する。Inspectorの設定は変更しない。
+    private void OnTriggerEnter(Collider other)
     {
-        RegisterContact(collision.collider);
+        RegisterContact(other);
     }
 
-    private void OnCollisionStay(Collision collision)
+    private void OnTriggerStay(Collider other)
     {
-        RegisterContact(collision.collider);
+        RegisterContact(other);
     }
 
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider other)
     {
-        RemoveContact(collision.collider);
+        RemoveContact(other);
     }
 
     private void OnDisable()
@@ -47,7 +46,7 @@ public class ButtonSensorRelay : MonoBehaviour
         {
             if (button != null)
             {
-                button.RemoveContact(contact);
+                button.RemoveContact(contact, sourceId);
             }
         }
         contacts.Clear();
@@ -55,13 +54,13 @@ public class ButtonSensorRelay : MonoBehaviour
 
     private void RegisterContact(Collider other)
     {
-        if (button == null || other == null)
+        if (!isActiveAndEnabled || button == null || other == null)
         {
             return;
         }
-
         contacts.Add(other);
-        button.AddContact(other);
+        // Stayで再通知しても、同じセンサーIDは重複登録されない。
+        button.AddContact(other, sourceId);
     }
 
     private void RemoveContact(Collider other)
@@ -69,7 +68,7 @@ public class ButtonSensorRelay : MonoBehaviour
         contacts.Remove(other);
         if (button != null)
         {
-            button.RemoveContact(other);
+            button.RemoveContact(other, sourceId);
         }
     }
 }

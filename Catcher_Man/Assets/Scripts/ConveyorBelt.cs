@@ -129,6 +129,7 @@ public class ConveyorBelt : MonoBehaviour
         {
             Rigidbody rb = other.gameObject.GetComponent<Rigidbody>();
             rb.constraints &= ~RigidbodyConstraints.FreezePositionY;
+            rb.isKinematic = false;
         }
     }
 }

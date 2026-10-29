@@ -23,6 +23,8 @@ public class ItemGimmick : MonoBehaviour {
     public bool IsTrap => isTrap;
     [SerializeField] private bool isAttacking;
     public bool IsAttacking => isAttacking;
+    [SerializeField] private bool isCollidedItem = false;
+    public bool IsCollidedItem => isCollidedItem;
     private readonly HashSet<EnemyController> hitEnemies = new();
 
     
@@ -182,7 +184,7 @@ public class ItemGimmick : MonoBehaviour {
 
     public void EmphasisItems(bool sw)
     {
-        if(id != -1)
+        if(id != -1 && !isAttached)
         {
             frame.SetActive(sw);
         }
@@ -191,6 +193,12 @@ public class ItemGimmick : MonoBehaviour {
     }
     private void OnCollisionEnter(Collision collision)
     {
+        
+        if(isAttached)
+        {
+            Debug.Log("装備してものに当たってるよ");
+            isCollidedItem = true;
+        }
         //Debug.Log("当たった");
         if(collision.gameObject.CompareTag("Player") && isTrap)
         {
@@ -212,22 +220,63 @@ public class ItemGimmick : MonoBehaviour {
             rb.isKinematic = true;
         }
         TryDamageEnemy(collision);
+        
 
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(isAttached && (other.gameObject.CompareTag("Ground") || other.gameObject.CompareTag("Item")))
+        {
+            Debug.Log(db.GetItemNameById(id) + "のアイテムは" + other.gameObject + "に衝突してるよ");
+            Debug.Log("装備してものに当たってるよ");
+            isCollidedItem = true;
+        }
     }
     private void OnCollisionStay(Collision collision)
     {
+        if(isAttached)
+        {
+            isCollidedItem = true;
+        }
         TryDamageEnemy(collision);
+        
     }
 
     
     
     private void OnCollisionExit(Collision collision)
     {
+        if(isAttached)
+        {
+            isCollidedItem = false;
+        }
         if(!collision.gameObject.CompareTag("Ground"))
         {
             Rigidbody rb = GetComponent<Rigidbody>();
             rb.isKinematic = false;
         }
+        
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if(isAttached && (other.gameObject.CompareTag("Ground") || other.gameObject.CompareTag("Item")))
+        {
+            Debug.Log("装備してものから離れたよ");
+            isCollidedItem = false;
+        }
+    }
+    public void SetTrap(bool flag)
+    {
+        if (flag)
+        {
+            isTrap = true;
+        }
+        else
+        {
+            isTrap = false;
+        }
+        
     }
     /*public void Initialized(GameObject instance, int id)
     {
