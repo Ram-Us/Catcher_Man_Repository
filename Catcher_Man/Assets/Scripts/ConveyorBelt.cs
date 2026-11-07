@@ -58,17 +58,19 @@ public class ConveyorBelt : MonoBehaviour
                 itemConstraints.Add(itemBody, originalConstraints);
             }
 
-            itemBody.constraints = originalConstraints & ~RigidbodyConstraints.FreezePositionZ;
-            if (itemBody.isKinematic)
-            {
-                itemBody.MovePosition(itemBody.position + Vector3.back * beltSpeed * Time.fixedDeltaTime);
-            }
-            else
-            {
-                Vector3 velocity = itemBody.linearVelocity;
-                velocity.z = -beltSpeed;
-                itemBody.linearVelocity = velocity;
-            }
+            // 横方向へ運びながら、上下方向は重力に任せる。
+            itemBody.constraints = originalConstraints &
+                ~(RigidbodyConstraints.FreezePositionY |
+                RigidbodyConstraints.FreezePositionZ);
+
+            itemBody.isKinematic = false;
+            itemBody.useGravity = true;
+
+            Vector3 velocity = itemBody.linearVelocity;
+            velocity.z = -beltSpeed;
+
+            // Y方向の速度はそのまま残す。
+            itemBody.linearVelocity = velocity;
         }
 
         itemsToRelease.Clear();
@@ -83,7 +85,14 @@ public class ConveyorBelt : MonoBehaviour
         {
             if (itemBody != null && itemConstraints.TryGetValue(itemBody, out RigidbodyConstraints constraints))
             {
-                itemBody.constraints = constraints;
+                ItemGimmick item = itemBody.GetComponentInParent<ItemGimmick>();
+
+                // 装備された場合は、装備側が設定した物理状態を維持する。
+                if (item == null || !item.IsAttached)
+                {
+                    itemBody.constraints =
+                        constraints & ~RigidbodyConstraints.FreezePositionY;
+                }
             }
             itemConstraints.Remove(itemBody);
         }
@@ -91,15 +100,30 @@ public class ConveyorBelt : MonoBehaviour
 
     private void OnDisable()
     {
-        foreach (KeyValuePair<Rigidbody, RigidbodyConstraints> item in itemConstraints)
+        foreach (KeyValuePair<Rigidbody, RigidbodyConstraints> entry
+                in itemConstraints)
         {
-            if (item.Key != null)
+            Rigidbody body = entry.Key;
+
+            if (body == null)
             {
-                item.Key.constraints = item.Value;
+                continue;
+            }
+
+            ItemGimmick item = body.GetComponentInParent<ItemGimmick>();
+
+            // 装備中は、装備側の設定を変更しない。
+            if (item == null || !item.IsAttached)
+            {
+                body.constraints =
+                    entry.Value & ~RigidbodyConstraints.FreezePositionY;
             }
         }
+
         itemConstraints.Clear();
         currentItems.Clear();
+        movedItems.Clear();
+        itemsToRelease.Clear();
     }
 
     private bool IsItem(Collider candidate)
@@ -124,12 +148,5 @@ public class ConveyorBelt : MonoBehaviour
         inputSpeedMultiplier = Mathf.Clamp01(inputSpeedMultiplier);
     }
 
-    private void OnCollisionEnter(Collision other) {
-        if (other.gameObject.CompareTag("Item"))
-        {
-            Rigidbody rb = other.gameObject.GetComponent<Rigidbody>();
-            rb.constraints &= ~RigidbodyConstraints.FreezePositionY;
-            rb.isKinematic = false;
-        }
-    }
 }
+

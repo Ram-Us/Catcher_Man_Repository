@@ -20,10 +20,29 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
     private float currentDistance;
     [SerializeField] private Transform player;
     [SerializeField] private int chaseSpeed;
+    [SerializeField] private AudioClip shootStateClip;
     private ShootEnemyContorller shooter;
     private int currentSpeed;
+
+    [Header("移動中のループ音")]
+    [SerializeField] private AudioClip moveLoopClip;
+    [SerializeField, Range(0f, 1f)] private float moveVolume = 1f;
+    [SerializeField, Min(0.1f)] private float moveSoundMinDistance = 10f;
+    [SerializeField, Min(0.1f)] private float moveSoundMaxDistance = 100f;
+    [SerializeField, Min(0f)] private float moveSoundThreshold = 0.02f;
+    private AudioSource moveAudioSource;
+    private Vector3 previousAudioPosition;
+
     void Awake()
     {
+        GameObject soundObject = new GameObject("FlyMovementAudio");
+        soundObject.transform.SetParent(transform, false);
+        moveAudioSource = soundObject.AddComponent<AudioSource>();
+        moveAudioSource.playOnAwake = false;
+        moveAudioSource.loop = true;
+        moveAudioSource.spatialBlend = 1f;
+        moveAudioSource.dopplerLevel = 0f;
+        moveAudioSource.rolloffMode = AudioRolloffMode.Linear;
         rb = GetComponent<Rigidbody>();
         rb.useGravity =  false;
         this.transform.position += new Vector3(0,addHeight,0);
@@ -35,6 +54,8 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
 
     void Update()
     {
+        if (StopIfPlayerMissing()) return;
+
         currentDistance = GetDistancePlayer();
         switch (currentState)
         {
@@ -52,6 +73,10 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
                 if(currentDistance < battleDistance)
                 {
                     currentState = EnemyState.Shoot;
+                    if (shootStateClip != null)
+                    {
+                        AudioSource.PlayClipAtPoint(shootStateClip, transform.position);
+                    }
                 }
                 else if(currentDistance > idleDistance)
                 {
@@ -91,6 +116,8 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
 
     void FixedUpdate()
     {
+        if (StopIfPlayerMissing()) return;
+
 
         float direction = Math.Sign(player.position.z - transform.position.z);
         if(direction <= -1)
@@ -135,18 +162,81 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
                 break;
         }
     }
+    private void OnEnable()
+    {
+        previousAudioPosition = transform.position;
+    }
+
+    private void LateUpdate()
+    {
+        Vector3 position = transform.position;
+        float distance = Vector3.Distance(position, previousAudioPosition);
+        previousAudioPosition = position;
+        if (moveAudioSource == null) return;
+
+        moveAudioSource.volume = moveVolume;
+        moveAudioSource.minDistance = Mathf.Max(0.1f, moveSoundMinDistance);
+        moveAudioSource.maxDistance = Mathf.Max(moveAudioSource.minDistance, moveSoundMaxDistance);
+        if (moveAudioSource.clip != moveLoopClip)
+        {
+            moveAudioSource.Stop();
+            moveAudioSource.clip = moveLoopClip;
+        }
+
+        bool moving = Time.timeScale > 0f && player != null &&
+                      moveLoopClip != null &&
+                      ((rb != null && !rb.isKinematic &&
+                        rb.linearVelocity.sqrMagnitude > moveSoundThreshold * moveSoundThreshold) ||
+                       distance > moveSoundThreshold * Mathf.Max(Time.deltaTime, 0.0001f));
+        if (moving)
+        {
+            if (!moveAudioSource.isPlaying) moveAudioSource.Play();
+        }
+        else
+        {
+            moveAudioSource.Stop();
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (moveAudioSource != null) moveAudioSource.Stop();
+    }
+
+    // UpdateだけでなくFixedUpdateからも確認する。
+    private bool StopIfPlayerMissing()
+    {
+        if (player != null) return false;
+
+        currentState = EnemyState.Idle;
+        currentSpeed = 0;
+        if (rb != null && !rb.isKinematic)
+        {
+            Vector3 velocity = rb.linearVelocity;
+            velocity.x = 0f;
+            velocity.z = 0f;
+            rb.linearVelocity = velocity;
+        }
+        return true;
+    }
+
     private float GetDistancePlayer()
     {
 
-        return Math.Abs(transform.position.z - player.position.z);
+        return player == null
+            ? float.PositiveInfinity
+            : Math.Abs(transform.position.z - player.position.z);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (player == null || enemyData == null) return;
         if (collision.gameObject.CompareTag("Player"))
         {
-            int damage = this.gameObject.GetComponent<EnemyController>().EnemyAttackDamage;
-            collision.gameObject.GetComponent<PlayerManager>().SetPlayerHp(damage);
+            PlayerManager manager =
+                collision.gameObject.GetComponentInParent<PlayerManager>();
+            if (manager != null)
+                manager.SetPlayerHp(enemyData.EnemyAttackDamage);
         }
         
     }
@@ -154,13 +244,14 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
     {
         get
         {
-            return currentState == EnemyState.Cooldown;
+            return player == null || currentState == EnemyState.Cooldown;
         }
     }
     public int CurrentStateCode
     {
         get
         {
+            if (player == null) return 0;
             return currentState switch
             {
                 EnemyState.Idle     => 0,
@@ -175,6 +266,7 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
     {
         get
         {
+            if (player == null) return 0f;
             return Mathf.Sign(
                 player.position.z - transform.position.z
             );
@@ -184,6 +276,7 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
     {
         get
         {
+            if (player == null) return Vector3.zero;
             Vector3 a = player.position - transform.position;
             a.x = 0f;
             return a.normalized;
@@ -195,5 +288,4 @@ public class FlyMovement : MonoBehaviour,IEnemyShootProvider,IEnemyProvider
     
         
     }
-
 

@@ -14,6 +14,19 @@ public class SlotController : MonoBehaviour
      private TextMeshProUGUI stock;
 
     [SerializeField] private ItemDataBase dataBase;
+
+    private void Awake()
+    {
+        int count = Mathf.Min(slotItem.Count, stockCount.Length);
+        for (int i = 0; i < count; i++)
+        {
+            if (slotItem[i] != null && stockCount[i] == 0 &&
+                slotItem[i].sprite == baseSprite)
+            {
+                slotItem[i].enabled = false;
+            }
+        }
+    }
     
     public bool TryAdd(){
         foreach (Image sItem in slotItem){
@@ -59,6 +72,7 @@ public class SlotController : MonoBehaviour
                         SItem.sprite = sr.sprite;
                     }
                 }
+                SItem.enabled = true;
                 RectTransform rect = SItem.rectTransform;
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,dataBase.GetWidthById(itemId));
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,dataBase.GetHeightById(itemId));
@@ -76,6 +90,7 @@ public class SlotController : MonoBehaviour
         RectTransform rect = slotItem[r].rectTransform;
         rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,100);
         slotItem[r].sprite = baseSprite;
+        slotItem[r].enabled = false;
     }
     public void MoveFrame(int n)
     {
@@ -84,6 +99,7 @@ public class SlotController : MonoBehaviour
     public void AddStock(int n)
     {
         stockCount[n]++;
+        slotItem[n].enabled = true;
         stock = slotItem[n].GetComponentInChildren<TextMeshProUGUI>();
         stock.SetText(stockCount[n].ToString());
     }
@@ -92,6 +108,10 @@ public class SlotController : MonoBehaviour
         if (stockCount[n] > 0)
         {
             stockCount[n]--;
+            if (stockCount[n] == 0 && slotItem[n].sprite == baseSprite)
+            {
+                slotItem[n].enabled = false;
+            }
             stock = slotItem[n].GetComponentInChildren<TextMeshProUGUI>();
             stock.SetText(stockCount[n].ToString());
         }

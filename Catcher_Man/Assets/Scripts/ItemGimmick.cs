@@ -25,6 +25,7 @@ public class ItemGimmick : MonoBehaviour {
     public bool IsAttacking => isAttacking;
     [SerializeField] private bool isCollidedItem = false;
     public bool IsCollidedItem => isCollidedItem;
+    [SerializeField] private AudioClip enemyHitClip;
     private readonly HashSet<EnemyController> hitEnemies = new();
 
     
@@ -193,10 +194,10 @@ public class ItemGimmick : MonoBehaviour {
     }
     private void OnCollisionEnter(Collision collision)
     {
-        
+        ForwardEnemyHit(collision);
         if(isAttached)
         {
-            Debug.Log("装備してものに当たってるよ");
+            //Debug.Log("装備してものに当たってるよ");
             isCollidedItem = true;
         }
         //Debug.Log("当たった");
@@ -208,38 +209,71 @@ public class ItemGimmick : MonoBehaviour {
 
             if (playerManager != null)
             {
-                Debug.Log(trapDamage+"ダメージ与えます");
+                //Debug.Log(trapDamage+"ダメージ与えます");
                 playerManager.SetPlayerHp(trapDamage);
             }
         }
 
-        if(collision.gameObject.CompareTag("Ground"))
+        // ベルト上では、地面に触れても物理挙動を固定しない。
+        bool isConveyor =
+            collision.collider.GetComponentInParent<ConveyorBelt>() != null;
+
+        if (collision.gameObject.CompareTag("Ground") &&
+            !isThrown && !isAttached && !isConveyor)
         {
             Rigidbody rb = GetComponent<Rigidbody>();
             rb.constraints |= RigidbodyConstraints.FreezePositionY;
             rb.isKinematic = true;
         }
-        TryDamageEnemy(collision);
         
 
     }
 
     private void OnTriggerEnter(Collider other)
     {
+        ForwardSwingHit(other);
+        
         if(isAttached && (other.gameObject.CompareTag("Ground") || other.gameObject.CompareTag("Item")))
         {
-            Debug.Log(db.GetItemNameById(id) + "のアイテムは" + other.gameObject + "に衝突してるよ");
-            Debug.Log("装備してものに当たってるよ");
+            //Debug.Log(db.GetItemNameById(id) + "のアイテムは" + other.gameObject + "に衝突してるよ");
+            //Debug.Log("装備してものに当たってるよ");
             isCollidedItem = true;
         }
     }
+    private void OnTriggerStay(Collider other)
+    {
+        // すでに重なっている状態で振り始めても命中させる。
+        ForwardSwingHit(other);
+    }
+
+    private void ForwardSwingHit(Collider other)
+    {
+        if (!isAttached || !isAttacking || isThrown)
+            return;
+
+        // 敵の索敵用Triggerでは命中させない。
+        if (other.isTrigger && other.GetComponent<DamagedArea>() == null)
+            return;
+
+        BossController boss = other.GetComponentInParent<BossController>();
+        if (boss != null)
+        {
+            EnemyController enemy = boss.GetComponent<EnemyController>();
+            if (TryRegisterEnemyHit(enemy))
+                boss.ReceiveItemHit(this);
+            return;
+        }
+
+        ForwardEnemyHit(other);
+    }
+
     private void OnCollisionStay(Collision collision)
     {
+        ForwardEnemyHit(collision);
         if(isAttached)
         {
             isCollidedItem = true;
         }
-        TryDamageEnemy(collision);
         
     }
 
@@ -251,7 +285,7 @@ public class ItemGimmick : MonoBehaviour {
         {
             isCollidedItem = false;
         }
-        if(!collision.gameObject.CompareTag("Ground"))
+        if(!isAttached && !collision.gameObject.CompareTag("Ground"))
         {
             Rigidbody rb = GetComponent<Rigidbody>();
             rb.isKinematic = false;
@@ -307,7 +341,8 @@ public class ItemGimmick : MonoBehaviour {
 
         if (cl != null)
         {
-            cl.isTrigger = false;
+            // 装備中はTrigger、置く・投げるときは通常の衝突。
+            cl.isTrigger = isAttached;
         }
 
         if (!isAttached)
@@ -323,11 +358,18 @@ public class ItemGimmick : MonoBehaviour {
     }
     public void SetThrown(bool isChecked)
     {
+        if (isChecked && !isThrown)
+        {
+            hitEnemies.Clear();
+        }
+
         isThrown = isChecked;
+
         if (isThrown)
         {
             EndAttack();
         }
+
         SetAnimatorEnabled(isAttached && !isThrown);
     }
 
@@ -347,29 +389,16 @@ public class ItemGimmick : MonoBehaviour {
         isAttacking = false;
     }
 
-    private void TryDamageEnemy(Collision other)
+    // 同じ攻撃で、同じ敵に複数回ダメージを与えない。
+    public bool TryRegisterEnemyHit(EnemyController enemy)
     {
-        if (!isAttached || !isAttacking || db == null)
-        {
-            return;
-        }
+        if (enemy == null)
+            return false;
 
-        EnemyController enemy =
-            other.gameObject.GetComponentInParent<EnemyController>();
+        if (!isThrown && !(isAttached && isAttacking))
+            return false;
 
-        if (enemy == null || !enemy.CompareTag("Enemy"))
-        {
-            return;
-        }
-
-        if (!hitEnemies.Add(enemy))
-        {
-            return;
-        }
-
-        int damage = db.GetAttackById(id);
-        enemy.SetEnemyHp(damage);
-        
+        return hitEnemies.Add(enemy);
     }
 
     private void SetAnimatorEnabled(bool isEnabled)
@@ -380,6 +409,35 @@ public class ItemGimmick : MonoBehaviour {
             itemAnimator.enabled = isTrap || isEnabled;
         }
     }
+    private void ForwardEnemyHit(Collision collision)
+    {
+        ForwardEnemyHit(collision.collider);
+    }
 
+    private void ForwardEnemyHit(Collider other)
+    {
+        if (!isThrown && !(isAttached && isAttacking))
+            return;
+
+        // ボスのダメージは既存のBossControllerに任せる。
+        if (other.GetComponentInParent<BossController>() != null)
+            return;
+
+        EnemyController enemy =
+            other.GetComponentInParent<EnemyController>();
+
+        if (enemy == null)
+            return;
+
+        foreach (DamagedArea area in
+                enemy.GetComponentsInChildren<DamagedArea>())
+        {
+            if (area.isActiveAndEnabled)
+            {
+                area.ReceiveItemHit(this);
+                break;
+            }
+        }
+    }
 
 }

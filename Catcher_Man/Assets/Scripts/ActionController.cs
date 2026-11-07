@@ -10,6 +10,12 @@ public class ActionController : MonoBehaviour
     private bool isTouched = false;
     [SerializeField] private SlotController sc;
     [SerializeField] private ItemSearcher ic;
+    [SerializeField] private UnityEngine.UI.RawImage catchAvailableImage;
+    [Header("実行可能な操作のUI（RawImage）")]
+    [SerializeField] private UnityEngine.UI.RawImage putAvailableImage;
+    [SerializeField] private UnityEngine.UI.RawImage throwAvailableImage;
+    [SerializeField] private UnityEngine.UI.RawImage swingAvailableImage;
+
     private int selectNumber,id = 0;
     public int SelectNumber => selectNumber;
     [SerializeField]float shootSpeed = 5f;
@@ -17,6 +23,31 @@ public class ActionController : MonoBehaviour
     [SerializeField]private List<int> getItems = new();
     [SerializeField] private GameObject shootPoint,weapon;
     private GameObject weaponObject;
+    [Header("アイテム取得音")]
+    [SerializeField] private AudioClip catchClip;
+    [SerializeField, Range(0f, 5f)] private float catchVolume = 1f;
+    private AudioSource catchAudioSource;
+
+    [Header("効果音")]
+    [SerializeField] private AudioClip putClip, throwClip, ironBallAttackClip;
+    [Header("効果音の音量")]
+    [SerializeField, Range(0f, 5f)]
+    private float putVolume = 1f;
+
+    [SerializeField, Range(0f, 5f)]
+    private float throwVolume = 1f;
+
+    [SerializeField, Range(0f, 5f)]
+    private float ironBallAttackVolume = 1f;
+    [SerializeField] private string fireShieldLayerName = "EquippedWeapon";
+    private bool isWeaponBurning;
+    private bool requiresWeaponReselection;
+    private float weaponBurnEndTime;
+    private GameObject burningWeapon;
+    private int burningSlot;
+    private int burningItemId;
+    private int pendingFireDamage;
+    private PlayerManager burningPlayer;
     [SerializeField]private bool isAttacking;
     public bool IsAttacking => isAttacking;
     [SerializeField, Min(0.01f)] private float ironBallAttackDuration = 0.4f;
@@ -55,9 +86,21 @@ public class ActionController : MonoBehaviour
     private Vector3 activeWeaponPosition;
     private Vector3 activeWeaponEulerAngles;
     private float pendingWeaponDirection;
+    [SerializeField] private VictoryResultUI victoryResultUI;
+
+    
 
     private void Awake()
     {
+        GameObject soundObject = new GameObject("CatchAudio");
+        soundObject.transform.SetParent(transform, false);
+        catchAudioSource = soundObject.AddComponent<AudioSource>();
+        catchAudioSource.playOnAwake = false;
+        catchAudioSource.loop = false;
+        catchAudioSource.spatialBlend = 0f;
+        catchAudioSource.volume = 1f;
+        SetCatchImageVisible(false);
+        HideActionImages();
         catchAction = InputSystem.actions.FindAction("Catch");
         putAction = InputSystem.actions.FindAction("Put");
         selectAction = InputSystem.actions.FindAction("Select");
@@ -93,6 +136,8 @@ public class ActionController : MonoBehaviour
     }
     private void OnDisable()
     {
+        SetCatchImageVisible(false);
+        HideActionImages();
         catchAction.started -= OnCatch;
         putAction.started -= OnPut;
         selectAction.started -= OnSelect;
@@ -110,6 +155,10 @@ public class ActionController : MonoBehaviour
     }
     void FixedUpdate()
     {
+        if (isWeaponBurning && Time.time >= weaponBurnEndTime)
+        {
+            CompleteWeaponBurn();
+        }
         if (isAttacking && attackFlagCoroutine == null &&
             (weaponColliderController == null || !weaponColliderController.IsSwinging))
         {
@@ -129,60 +178,153 @@ public class ActionController : MonoBehaviour
             WeaponDirection(beforeMoveDirection);
         }
 
-        if (isTouched)
+    }
+
+    private void LateUpdate()
+    {
+        SetCatchImageVisible(TryGetCatchSlot(out _, out _));
+        SetActionImage(putAvailableImage, CanPut());
+        SetActionImage(throwAvailableImage, CanThrow());
+        SetActionImage(swingAvailableImage, CanSwing());
+    }
+
+    private static void SetActionImage(UnityEngine.UI.RawImage image, bool visible)
+    {
+        if (image != null)
+            image.enabled = visible;
+    }
+
+    private void HideActionImages()
+    {
+        SetActionImage(putAvailableImage, false);
+        SetActionImage(throwAvailableImage, false);
+        SetActionImage(swingAvailableImage, false);
+    }
+
+    // UIと入力処理で共通の条件を使う。
+    private bool CanUseSelectedItem(InputAction action)
+    {
+        return isActiveAndEnabled && Time.timeScale > 0f &&
+               action != null && action.enabled &&
+               !isWeaponBurning && !requiresWeaponReselection &&
+               weapon != null && dataBase != null &&
+               getItems != null && sc != null && sc.StockCount != null &&
+               selectNumber >= 0 && selectNumber < getItems.Count &&
+               selectNumber < sc.StockCount.Length &&
+               getItems[selectNumber] > 0 && sc.StockCount[selectNumber] > 0;
+    }
+
+    private bool CanPut()
+    {
+        if (!CanUseSelectedItem(putAction) ||
+            weaponObject == null || !weaponObject.activeInHierarchy ||
+            weapon.transform.childCount == 0)
+            return false;
+
+        ItemGimmick item = weapon.transform.GetChild(0).GetComponent<ItemGimmick>();
+        GameObject prefab = dataBase.GetIntanceById(getItems[selectNumber]);
+        return item != null && !item.IsCollidedItem &&
+               prefab != null && prefab.GetComponent<ItemGimmick>() != null;
+    }
+
+    private bool CanThrow()
+    {
+        if (!CanUseSelectedItem(throwAction))
+            return false;
+
+        GameObject prefab = dataBase.GetIntanceById(getItems[selectNumber]);
+        return prefab != null && prefab.GetComponent<ItemGimmick>() != null &&
+               prefab.GetComponent<Rigidbody>() != null &&
+               LayerMask.NameToLayer("AttackWeapon") >= 0;
+    }
+
+    private bool CanSwing()
+    {
+        if (!CanUseSelectedItem(swingAction))
+            return false;
+
+        int selectedItemId = getItems[selectNumber];
+        // 非表示の武器はOnSwingで装備し直すので、生成元も確認する。
+        GameObject source = weapon.activeSelf
+            ? weaponObject : dataBase.GetIntanceById(selectedItemId);
+        if (source == null || source.GetComponent<ItemGimmick>() == null)
+            return false;
+        if (weapon.activeSelf && !source.activeInHierarchy)
+            return false;
+
+        Animator animator = weapon.activeSelf
+            ? weaponAnimator : source.GetComponentInChildren<Animator>(true);
+
+        if ((int)dataBase.GetItemTypeById(selectedItemId) == 4)
+            return animator != null && !isAttacking;
+        if (selectedItemId == 9)
+            return animator != null && sp != null && !isSpecialCharging;
+
+        return weaponColliderController != null &&
+               !weaponColliderController.IsSwinging;
+    }
+
+    private void SetCatchImageVisible(bool visible)
+    {
+        if (catchAvailableImage != null)
         {
-            Debug.Log("タッチ中");
-            if(sc.TryAdd()){
-                Debug.Log("アイテム化可能");
+            catchAvailableImage.enabled = visible;
+        }
+    }
+
+    // UI表示と取得処理で、同じ条件を確認する。
+    private bool TryGetCatchSlot(out int slotIndex, out bool existed)
+    {
+        slotIndex = -1;
+        existed = false;
+        if (isWeaponBurning || !isTouched || gb == null ||
+            !gb.activeInHierarchy || id <= 0 || sc == null ||
+            dataBase == null || getItems == null || sc.StockCount == null)
+        {
+            return false;
+        }
+
+        int slotCount = Mathf.Min(getItems.Count, sc.StockCount.Length);
+        // 同じIDがあれば、空き枠よりも個数の加算を優先する。
+        for (int i = 0; i < slotCount; i++)
+        {
+            if (getItems[i] == id)
+            {
+                slotIndex = i;
+                existed = true;
+                return true;
             }
         }
+        for (int i = 0; i < slotCount; i++)
+        {
+            if (getItems[i] == 0)
+            {
+                slotIndex = i;
+                return true;
+            }
+        }
+        return false;
     }
 
     private void OnCatch(InputAction.CallbackContext context)
     {
-        if (isTouched)
-        {   //Debug.Log("タッチ");
-            
-            Debug.Log(id+"を取得");
-            if (sc.TryAdd() && id > 0 )//空きがある状態での同アイテムに加算、もしくは空いた枠にアイテムを格納
-            {
-                //Debug.Log("獲得！");
-                for(int i = 0; i < getItems.Count; i++)
-                {
-                    if (getItems[i] == id)
-                    {
-                        SetItem(gb,i,true);
-                        //Debug.Log("同じアイテムが入ってるので足したぞ！");
-                        break;
-                    }else if (getItems[i] == 0)
-                    {
-                        getItems[i] = id;
-                        SetItem(gb,i,false);
-                        //Debug.Log("空き枠に新しいアイテムを入れたぞ！");
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                for(int i = 0; i<getItems.Count; i++)
-                {
-                    if (getItems[i] == id)
-                    {
-                        SetItem(gb,i,true);
-                        Debug.Log("アイテムは満帆だけど、同じアイテムがあったので足したぞ！");
-                        break;
-                    }
-                }
-            }
-            /*else
-            {
-                //Debug.Log("失敗");
-            }*/
+        if (!TryGetCatchSlot(out int slotIndex, out bool existed))
+        {
+            return;
         }
+        if (!existed)
+        {
+            getItems[slotIndex] = id;
+        }
+        SetItem(gb, slotIndex, existed);
+        SetCatchImageVisible(false);
     }
     private void OnPut(InputAction.CallbackContext context)
     {
+        if (!CanPut()) return;
+        if (isWeaponBurning) return;
+        if (requiresWeaponReselection) return;
+        if (weaponObject == null || !weaponObject.activeInHierarchy) return;
         
         if (!weapon.transform.GetChild(0).GetComponent<ItemGimmick>().IsCollidedItem)
         {
@@ -214,6 +356,13 @@ public class ActionController : MonoBehaviour
             itemGimmick.SetAttach(false);
             //rGb.transform.rotation = this.transform.rotation * Quaternion.Euler(0f,180f,0f);
             rGb.SetActive(true);
+            if (putClip != null)
+            {
+                AudioSource.PlayClipAtPoint(
+                putClip,
+                rGb.transform.position,
+                putVolume);
+            }
             if (sc.StockCount[selectNumber] <= 1)
             {
                 sc.DeleteUI(selectNumber);
@@ -230,6 +379,8 @@ public class ActionController : MonoBehaviour
     }
     private void OnSelect(InputAction.CallbackContext context)
     {
+        if (isWeaponBurning) return;
+        requiresWeaponReselection = false;
         // スロットを1つ進める
         selectNumber = (selectNumber + 1) % 4;
         // 選択中の枠を移動する
@@ -239,6 +390,9 @@ public class ActionController : MonoBehaviour
     }
     private void OnThrow(InputAction.CallbackContext context)
     {
+        if (!CanThrow()) return;
+        if (isWeaponBurning) return;
+        if (requiresWeaponReselection) return;
     EndWeaponAttack();
     int selectedItemId = getItems[selectNumber];
 
@@ -251,7 +405,19 @@ public class ActionController : MonoBehaviour
 
     GameObject prefab = dataBase.GetIntanceById(selectedItemId);
     GameObject rgb = Instantiate(prefab);
-    rgb.layer = LayerMask.NameToLayer("AttackWeapon");
+    int attackLayer = LayerMask.NameToLayer("AttackWeapon");
+
+    if (attackLayer < 0)
+    {
+        Debug.LogError("AttackWeaponレイヤーがありません。", this);
+        Destroy(rgb);
+        return;
+    }
+
+    foreach (Transform part in rgb.GetComponentsInChildren<Transform>(true))
+    {
+        part.gameObject.layer = attackLayer;
+    }
 
     ItemGimmick itemGimmick = rgb.GetComponent<ItemGimmick>();
     Rigidbody rg = rgb.GetComponent<Rigidbody>();
@@ -314,6 +480,10 @@ public class ActionController : MonoBehaviour
         beforeMoveDirection * -transform.right * dataBase.GetSpeedById(selectedItemId),
         ForceMode.Impulse
     );
+    if (throwClip != null)
+    {
+        AudioSource.PlayClipAtPoint(throwClip, rgb.transform.position,throwVolume);
+    }
     
 
     if (id == 5)
@@ -348,6 +518,106 @@ public class ActionController : MonoBehaviour
     sc.SubStock(selectNumber);
     }
 
+    // true: 装備側で火弾を処理済み。呼び出し元ではHPを減らさない。
+    public bool TryHandleFireBall(PlayerManager player, int damage,
+        GameObject burnEffectPrefab, float effectLifetime)
+    {
+        // 同じ燃焼中の重複命中で所持数・ダメージを重ねない。
+        if (isWeaponBurning) return true;
+        if (weapon == null || weaponObject == null ||
+            !weaponObject.activeInHierarchy ||
+            !weaponObject.transform.IsChildOf(weapon.transform))
+            return false;
+
+        int shieldLayer = LayerMask.NameToLayer(fireShieldLayerName);
+        if (shieldLayer < 0)
+        {
+            Debug.LogWarning("Fire Shield Layer Nameに実在する装備レイヤー名を設定してください。", this);
+            return false;
+        }
+        if (weaponObject.layer != shieldLayer) return false;
+
+        ItemGimmick item = weaponObject.GetComponent<ItemGimmick>();
+        if (item == null || !item.IsAttached || item.IsThrown) return false;
+        if (dataBase == null || sc == null)
+        {
+            Debug.LogError("火属性判定に必要なItemDataBaseまたはSlotControllerが未設定です。", this);
+            return true;
+        }
+        // 石・金属・Unknownは破壊もHP減少もなし。
+        if (dataBase.GetMaterialById(item.Id) != ItemMaterial.Wood) return true;
+
+        int slot = selectNumber;
+        if (slot < 0 || slot >= getItems.Count ||
+            slot >= sc.StockCount.Length || getItems[slot] != item.Id ||
+            sc.StockCount[slot] <= 0) return true;
+
+        isWeaponBurning = true;
+        burningWeapon = weaponObject;
+        burningSlot = slot;
+        burningItemId = item.Id;
+        burningPlayer = player;
+        pendingFireDamage = damage;
+        weaponBurnEndTime = Time.time + 1f;
+
+        EndWeaponAttack();
+        if (weaponColliderController != null) weaponColliderController.StopSwing();
+        if (specialShootCoroutine != null)
+        {
+            StopCoroutine(specialShootCoroutine);
+            specialShootCoroutine = null;
+            if (sp != null) sp.EnergyBallDestroy();
+        }
+        isSpecialCharging = false;
+
+        if (burnEffectPrefab != null)
+        {
+            // 親を指定せず、命中時のアイテムのワールド座標に生成。
+            GameObject burnEffect = Instantiate(burnEffectPrefab,
+                burningWeapon.transform.position, Quaternion.identity);
+                burnEffect.transform.parent = weaponObject.transform;
+                burnEffect.transform.localScale = new Vector3(2f,2f,2f);
+            foreach (ParticleSystem particle in burnEffect.GetComponentsInChildren<ParticleSystem>())
+                particle.Play();
+            Destroy(burnEffect, Mathf.Max(1f, effectLifetime));
+        }
+        return true;
+    }
+
+    private void CompleteWeaponBurn()
+    {
+        if (!isWeaponBurning) return;
+        isWeaponBurning = false;
+
+        if (burningSlot >= 0 && burningSlot < getItems.Count &&
+            sc != null && burningSlot < sc.StockCount.Length &&
+            getItems[burningSlot] == burningItemId)
+        {
+            sc.SubStock(burningSlot);
+            if (sc.StockCount[burningSlot] == 0)
+            {
+                getItems[burningSlot] = 0;
+                sc.DeleteUI(burningSlot);
+            }
+        }
+
+        if (burningWeapon != null)
+        {
+            burningWeapon.SetActive(false);
+            Destroy(burningWeapon);
+        }
+        burningWeapon = null;
+        weaponObject = null;
+        weaponAnimator = null;
+        if (weapon != null) weapon.SetActive(false);
+        // 在庫が残っていても、選び直すまで自動生成しない。
+        requiresWeaponReselection = true;
+
+        PlayerManager damagedPlayer = burningPlayer;
+        burningPlayer = null;
+        if (damagedPlayer != null) damagedPlayer.SetPlayerHp(pendingFireDamage);
+    }
+
     private static void SetDroppedItemRotation(Transform itemTransform, int itemId)
     {
         float worldYRotation = itemId == 9 ? 0f : 90f;
@@ -356,6 +626,9 @@ public class ActionController : MonoBehaviour
 
     private void OnSwing(InputAction.CallbackContext context)
     {
+        if (!CanSwing()) return;
+        if (isWeaponBurning) return;
+        if (requiresWeaponReselection) return;
         
         // 武器がまだ出ていなければ出す
         if (!weapon.activeSelf)
@@ -388,6 +661,10 @@ public class ActionController : MonoBehaviour
 
             weaponAnimator.SetTrigger("IronBall");
             BeginWeaponAttack();
+            if (isAttacking && ironBallAttackClip != null)
+            {
+                AudioSource.PlayClipAtPoint(ironBallAttackClip, weapon.transform.position,ironBallAttackVolume);
+            }
             attackFlagCoroutine = StartCoroutine(
                 EndAttackAfterDelay(ironBallAttackDuration));
         }
@@ -512,7 +789,7 @@ public class ActionController : MonoBehaviour
         BoxCollider box = weaponObject.GetComponent<BoxCollider>();
         if (box != null)
         {
-            box.isTrigger = false;
+            box.isTrigger = true;
         }
 
         isAttacking = true;
@@ -536,6 +813,8 @@ public class ActionController : MonoBehaviour
             BoxCollider box = weaponObject.GetComponent<BoxCollider>();
             if (box != null)
             {
+
+
                 box.isTrigger = true;
             }
             ItemGimmick equippedItem = weaponObject.GetComponent<ItemGimmick>();
@@ -547,7 +826,7 @@ public class ActionController : MonoBehaviour
         
         
         isAttacking = false;
-        SetEquippedWeaponLayer("EquippedWeapon");
+        SetEquippedWeaponLayer(fireShieldLayerName);
     }
 
     private void SetEquippedWeaponLayer(string layerName)
@@ -595,15 +874,16 @@ public class ActionController : MonoBehaviour
 
     }
 
-    private void OnCollisionExit(Collision other) {
-        if (other.gameObject.CompareTag("Item"))
+    private void OnCollisionExit(Collision other)
+    {
+        // 取得対象から離れたときに解除する。Itemsタグの供給元にも対応。
+        if (other.gameObject == gb)
         {
             isTouched = false;
             gb = null;
-            //Debug.Log("itemで"+id+"を格納しているよ");
-            //Debug.Log("触れてるよ");
+            id = 0;
+            SetCatchImageVisible(false);
         }
-
     }
     private int GetSelectedItemId()
     {
@@ -616,6 +896,7 @@ public class ActionController : MonoBehaviour
     }
     private void ShowWeaponForSelectedSlot()
     {
+        if (isWeaponBurning || requiresWeaponReselection) return;
         if (weapon == null)
         {
             Debug.LogWarning("Weaponがまだ設定されていません。");
@@ -696,7 +977,7 @@ public class ActionController : MonoBehaviour
         
         weaponObject.SetActive(false);
         if (weaponObject != null)
-                weaponObject.layer = LayerMask.NameToLayer("EquippedWeapon");
+                SetEquippedWeaponLayer(fireShieldLayerName);
 
         // 生成した武器の見た目とAnimatorを初期化する
         ItemGimmick weaponItem = weaponObject.GetComponent<ItemGimmick>();
@@ -733,6 +1014,8 @@ public class ActionController : MonoBehaviour
         BoxCollider cl = weaponObject.GetComponent<BoxCollider>();
         if (cl != null)
         {
+
+
             cl.isTrigger = true;
             cl.center = dataBase.GetEquippedColliderCenterById(selectedItemId);
             cl.size = dataBase.GetEquippedColliderSizeById(selectedItemId);
@@ -763,6 +1046,14 @@ public class ActionController : MonoBehaviour
         isTouched = false;
         this.gb = null;
         sc.AddStock(i);
+        // 実際に在庫へ追加できた時だけ鳴らす。
+        if (catchClip != null && catchAudioSource != null)
+            catchAudioSource.PlayOneShot(catchClip, Mathf.Clamp(catchVolume, 0f, 5f));
+
+        if (victoryResultUI != null)
+        {
+            victoryResultUI.AddCollectedItem(id);
+        }
         selectNumber = i;
         sc.MoveFrame(selectNumber);
         ShowWeaponForSelectedSlot();

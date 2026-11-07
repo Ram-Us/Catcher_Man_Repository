@@ -37,7 +37,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
+  m_CustomRenderQueue: 2998
   stringTagMap:
     RenderType: Transparent
   disabledShaderPasses:
@@ -192,7 +192,7 @@ Material:
     - _AlphaTransitionMapProgressCoord: 0
     - _AlphaTransitionMapRandomRowCoord: 0
     - _AlphaTransitionMapRandomRowSelectionEnabled: 0
-    - _AlphaTransitionMapRotation: 0
+    - _AlphaTransitionMapRotation: 0.039
     - _AlphaTransitionMapRotationCoord: 0
     - _AlphaTransitionMapRowCount: 1
     - _AlphaTransitionMapSecondTextureChannelsX: 0
@@ -209,7 +209,7 @@ Material:
     - _AlphaTransitionMapSecondTextureSliceCount: 4
     - _AlphaTransitionMapSliceCount: 4
     - _AlphaTransitionMode: 1
-    - _AlphaTransitionProgress: 0.71
+    - _AlphaTransitionProgress: 0.562
     - _AlphaTransitionProgressCoord: 0
     - _AlphaTransitionProgressCoordSecondTexture: 0
     - _AlphaTransitionProgressSecondTexture: 0
@@ -312,7 +312,7 @@ Material:
     - _ParallaxMapSliceCount: 4
     - _ParallaxMapTarget: 1
     - _ParallaxStrength: 0.3
-    - _QueueOffset: 0
+    - _QueueOffset: -2
     - _ReceiveShadows: 1
     - _RenderType: 2
     - _RimTransparencyEnabled: 0

@@ -3,58 +3,97 @@ using UnityEngine;
 public class DamagedArea : MonoBehaviour
 {
     [SerializeField] private ItemDataBase db;
-    [SerializeField] private GameObject hitEffectPrefab,player,enemy;
-    private GameObject pre;
+    [SerializeField] private GameObject hitEffectPrefab, player, enemy;
+    [SerializeField] private AudioClip hitClip;
 
-    private void OnTriggerEnter(Collider collision)
+    [SerializeField, Min(0.1f)]
+    private float effectLifetime = 3f;
+
+    private EnemyController enemyController;
+    private BossController boss;
+
+    private void Awake()
     {
-        // この判定が敵の子に付いていても、親のBossControllerを検出する。
-        if (GetComponentInParent<BossController>() != null)
+        enemyController = enemy != null
+            ? enemy.GetComponentInParent<EnemyController>()
+            : GetComponentInParent<EnemyController>();
+
+        boss = GetComponentInParent<BossController>();
+
+        if (boss == null && enemy != null)
         {
-            return;
+            boss = enemy.GetComponentInParent<BossController>();
         }
+    }
 
-        ItemGimmick item =
-            collision.GetComponentInParent<ItemGimmick>();
+    private void OnTriggerEnter(Collider other)
+    {
+        CheckHit(other, true);
+    }
 
+    private void OnTriggerStay(Collider other)
+    {
+        // ボスの演出を毎フレーム生成しない。
+        if (boss != null)
+            return;
+
+        CheckHit(other, false);
+    }
+
+    private void CheckHit(Collider other, bool entered)
+    {
+        ReceiveItemHit(
+            other.GetComponentInParent<ItemGimmick>(),
+            entered
+        );
+    }
+
+    public void ReceiveItemHit(ItemGimmick item, bool entered = false)
+    {
         if (item == null || !item.CompareTag("Item"))
+            return;
+
+        if (!item.IsThrown &&
+            !(item.IsAttached && item.IsAttacking))
+            return;
+
+        // ボスのダメージ処理はBossControllerに任せる。
+        // ここでは従来どおり、侵入時の演出だけを扱う。
+        if (boss != null)
         {
+            if (entered)
+                PlayHitEffect();
+
             return;
         }
 
-        // 投げたアイテム、または振っている最中の装備だけを攻撃扱いにする。
-        if (!item.IsThrown && !(item.IsAttached && item.IsAttacking))
+        if (enemyController == null || db == null)
         {
+            Debug.LogError(
+                "EnemyまたはItemDataBaseの設定を確認してください。",
+                this
+            );
             return;
         }
 
-        if (enemy == null || db == null)
-        {
-            Debug.LogError("EnemyまたはItemDataBaseが未設定です。", this);
+        if (enemyController.EnemyHp <= 0)
             return;
-        }
-
-        EnemyController enemyController =
-            enemy.GetComponent<EnemyController>();
-
-        if (enemyController == null)
-        {
-            Debug.LogError("EnemyにEnemyControllerがありません。", enemy);
-            return;
-        }
 
         int damage = db.GetAttackById(item.Id);
+
+        if (!item.TryRegisterEnemyHit(enemyController))
+            return;
+
+        // ダメージが成立したときだけ演出する。
+        PlayHitEffect();
         enemyController.SetEnemyHp(damage);
 
-        if (hitEffectPrefab != null)
+        if (hitClip != null)
         {
-            GameObject effect = Instantiate(
-                hitEffectPrefab,
-                enemy.transform.position,
-                Quaternion.identity
+            AudioSource.PlayClipAtPoint(
+                hitClip,
+                transform.position
             );
-
-            Destroy(effect, 0.2f);
         }
 
         if (item.IsThrown)
@@ -62,5 +101,30 @@ public class DamagedArea : MonoBehaviour
             Destroy(item.gameObject);
         }
     }
-    }
 
+    private void PlayHitEffect()
+    {
+        if (hitEffectPrefab == null)
+        {
+            Debug.LogWarning("Hit Effect Prefabが未設定です。", this);
+            return;
+        }
+
+        // 敵の子にはせず、敵の破壊後も残す。
+        GameObject effect = Instantiate(
+            hitEffectPrefab,
+            transform.position,
+            Quaternion.identity
+        );
+
+        effect.SetActive(true);
+
+        foreach (ParticleSystem particle in
+                 effect.GetComponentsInChildren<ParticleSystem>())
+        {
+            particle.Play(false);
+        }
+
+        Destroy(effect, effectLifetime);
+    }
+}

@@ -9699,11 +9699,11 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.61
+  m_Radius: 1.63
   m_Height: 0.22
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
@@ -9719,8 +9719,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67a5dd5d340ea6b4d84f200a5dfab1e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Boss: {fileID: 4125030032239404139, guid: b8a1c1810e7671d4492775f991eaf9b4, type: 3}
-  Player: {fileID: 3170357763474722860, guid: 09f9ceb03ec0d5445a63797edeca1ecb, type: 3}
+  boss: {fileID: 0}
+  ballDamage: 50
 --- !u!54 &8094328213164910316
 Rigidbody:
   m_ObjectHideFlags: 0
