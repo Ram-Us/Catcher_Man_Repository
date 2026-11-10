@@ -1,8 +1,7 @@
 using System.Security;
 using Unity.Cinemachine;
 using Unity.VisualScripting;
-using UnityEditor.Search;
-using UnityEditor.ShaderKeywordFilter;
+
 using UnityEngine;
 
 public class CinemachineController : MonoBehaviour

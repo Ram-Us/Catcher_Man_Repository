@@ -22,11 +22,23 @@ public enum ItemType
 
 }
 
+// Unknownを0にし、既存アイテムを勝手に木製扱いにしない。
+public enum ItemMaterial
+{
+    Unknown = 0,
+    Wood = 1,
+    Stone = 2,
+    Metal = 3
+}
+
 [System.Serializable]
 public class Item
 {
     [SerializeField] private int id;             // アイテムのID
     public int Id => id;
+
+    [SerializeField] private ItemMaterial material = ItemMaterial.Unknown;
+    public ItemMaterial Material => material;
 
     [SerializeField] private Sprite icon;        // アイテムのアイコン画像
     public Sprite Icon => icon;
@@ -94,6 +106,12 @@ public class ItemDataBase : ScriptableObject
             }
         }
         return null;
+    }
+
+    public ItemMaterial GetMaterialById(int id)
+    {
+        Item item = GetItemById(id);
+        return item != null ? item.Material : ItemMaterial.Unknown;
     }
 
     public GameObject GetIntanceById(int id)

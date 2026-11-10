@@ -815,7 +815,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4341995269951199168}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 10
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -855,6 +855,7 @@ MonoBehaviour:
   isTrap: 0
   isAttacking: 0
   isCollidedItem: 0
+  enemyHitClip: {fileID: 8300000, guid: d680b3170a102004f885507b4f3f47da, type: 3}
 --- !u!95 &672841825025377461
 Animator:
   serializedVersion: 7

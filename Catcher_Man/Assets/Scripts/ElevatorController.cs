@@ -11,6 +11,8 @@ public class ElevatorController : MonoBehaviour
     private Coroutine elevatorCoroutine;
     private Vector3 activeTargetPosition;
     private bool isMoving = false,isPlayerOnElevator = false;
+    [SerializeField] private GameObject point;
+    private bool wasPlaced;
 
     private void Awake()
     {
@@ -34,6 +36,29 @@ public class ElevatorController : MonoBehaviour
         );
     }
 
+    private void FixedUpdate()
+    {
+        if (point == null)
+        {
+            return;
+        }
+
+        ElevetorRePlace replace = point.GetComponent<ElevetorRePlace>();
+        if (replace == null)
+        {
+            return;
+        }
+
+        bool isPlaced = replace.IsPlaced;
+
+        // false → trueになった瞬間だけ実行する。
+        if (isPlaced && !wasPlaced)
+        {
+            ResetElevator();
+        }
+
+        wasPlaced = isPlaced;
+    }
     private IEnumerator MoveElevator(Vector3 targetPosition)
     {
         isMoving = true;
@@ -144,5 +169,23 @@ public class ElevatorController : MonoBehaviour
     private void OnValidate()
     {
         moveTime = Mathf.Max(0.01f,moveTime);
+    }
+
+    private void ResetElevator()
+    {
+        // 戻す前に、以前の移動処理を停止する。
+        StopElevator();
+
+        // Rigidbodyの位置を開始位置へ戻す。
+        if ((rb.position - startPosition).sqrMagnitude > 0.0001f)
+        {
+            rb.position = startPosition;
+        }
+
+        // 次に乗ったときは終点へ向かう。
+        activeTargetPosition = endPosition;
+
+        // 次の乗車判定を受け付ける。
+        isPlayerOnElevator = false;
     }
 }

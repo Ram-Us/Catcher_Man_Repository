@@ -64,13 +64,13 @@ MonoBehaviour:
     m_Value: 1
   threshold:
     m_OverrideState: 1
-    m_Value: 0.9
+    m_Value: 1.35
   intensity:
     m_OverrideState: 1
-    m_Value: 42.23
+    m_Value: 28.34
   scatter:
     m_OverrideState: 1
-    m_Value: 0.598
+    m_Value: 0
   clamp:
     m_OverrideState: 1
     m_Value: 65472
@@ -216,7 +216,7 @@ MonoBehaviour:
   active: 1
   normalBias:
     m_OverrideState: 1
-    m_Value: 0.05
+    m_Value: 0.03
   viewBias:
     m_OverrideState: 1
     m_Value: 0.1
@@ -699,7 +699,7 @@ MonoBehaviour:
     m_Value: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   balance:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: -9
 --- !u!114 &6148539124404812266
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -721,10 +721,10 @@ MonoBehaviour:
     m_Value: {x: 0.5, y: 0.5}
   intensity:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 0.146
   smoothness:
     m_OverrideState: 1
-    m_Value: 0.2
+    m_Value: 0.171
   rounded:
     m_OverrideState: 1
     m_Value: 0

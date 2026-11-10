@@ -13,6 +13,8 @@ TagManager:
   - Wall
   - Items
   - MoveGround
+  - SavePoint
+  - FallZone
   layers:
   - Default
   - TransparentFX
@@ -27,7 +29,7 @@ TagManager:
   - PlayerBody
   - PixelGround
   - WorldItem
-  - 
+  - Flash
   - 
   - 
   - 

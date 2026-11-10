@@ -10,6 +10,7 @@ public class ItemSearcher : MonoBehaviour
     private InputAction searchAction;
 
     [SerializeField] private List<GameObject> aroundItems = new();
+    [SerializeField] private AudioClip searchClip;
 
 
     private void Awake()
@@ -36,15 +37,27 @@ public class ItemSearcher : MonoBehaviour
     private void OnSearch(InputAction.CallbackContext context)
     {
         Debug.Log("Qが押されたぞ");
+        bool foundItem = false;
         foreach(GameObject obj in aroundItems)
         {
+            if (obj == null)
+            {
+                continue;
+            }
+
             ItemGimmick items = obj.GetComponent<ItemGimmick>();
             if(items != null)
             {
                 Debug.Log("これはアイテムにできるぞ！");
                 items.EmphasisItems(true);
+                foundItem = true;
             }
             
+        }
+
+        if (foundItem && searchClip != null)
+        {
+            AudioSource.PlayClipAtPoint(searchClip, transform.position);
         }
     }
 

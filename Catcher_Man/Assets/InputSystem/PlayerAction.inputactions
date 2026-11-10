@@ -3,7 +3,7 @@
     "name": "PlayerAction",
     "maps": [
         {
-            "name": "New action map",
+            "name": "PlayerActions",
             "id": "1b65ef9f-1cd9-4e20-a48b-9e027cd5b320",
             "actions": [
                 {
@@ -82,6 +82,24 @@
                     "name": "Crouch",
                     "type": "Button",
                     "id": "eb00c2f2-91c5-4323-871d-8011640b1609",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Restart",
+                    "type": "Button",
+                    "id": "faf6b7e0-7e32-4042-819b-13e783bcfb77",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ResetGame",
+                    "type": "Button",
+                    "id": "04a65570-dca1-4096-bd9c-338089b49a0a",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -322,8 +340,8 @@
                 },
                 {
                     "name": "",
-                    "id": "4c09bfd6-931a-4c14-858c-5ebaf614d717",
-                    "path": "<SwitchProControllerHID>/leftStick/down",
+                    "id": "62022df8-94fc-4faa-848b-926e25de839b",
+                    "path": "<SwitchProControllerHID>/buttonWest",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -333,12 +351,165 @@
                 },
                 {
                     "name": "",
-                    "id": "62022df8-94fc-4faa-848b-926e25de839b",
+                    "id": "cc2004ed-69a9-48b4-9d78-2d06bc84a950",
                     "path": "<Keyboard>/leftShift",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9198f13a-d793-449e-a26d-c638da79b969",
+                    "path": "<SwitchProControllerHID>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Restart",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3ce96418-ca96-4f4d-821c-e580ce264ae6",
+                    "path": "<SwitchProControllerHID>/select",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ResetGame",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Transition",
+            "id": "e86426a5-ff68-4986-b32e-3620fe795374",
+            "actions": [
+                {
+                    "name": "Confirm",
+                    "type": "Button",
+                    "id": "2a24810e-c556-4127-827d-9476e1ef0445",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "07f8ce04-c594-4ca7-a70b-7a0f16c61887",
+                    "path": "<SwitchProControllerHID>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Confirm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5d47de00-ec1b-4f67-88a5-38a07c9756f5",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Confirm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "GameOver",
+            "id": "e1a0a01a-6143-490f-952b-ab3a62e36715",
+            "actions": [
+                {
+                    "name": "Navigate",
+                    "type": "Value",
+                    "id": "f2d7d9d6-cdda-4baa-bb2c-1a9e695eb1c5",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Confirm",
+                    "type": "Button",
+                    "id": "c9299a4b-da29-4076-b495-ee24a34f8ee1",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "ae2cd72d-7c38-40e9-8380-49299a41023a",
+                    "path": "<SwitchProControllerHID>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "2D Vector",
+                    "id": "422f09a8-7c6b-4eac-b59b-077b518ea664",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "left",
+                    "id": "54d547a6-5722-48b4-8744-48a7480449f7",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "85232eab-701e-486e-a846-b465eb3f1c1c",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "c78e00d6-7aaf-45f1-9de9-fa2cb214e198",
+                    "path": "<SwitchProControllerHID>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Confirm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c066376f-3ee1-4a8d-bbd0-3732b7a282ca",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Confirm",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

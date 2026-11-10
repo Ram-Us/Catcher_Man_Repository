@@ -69,7 +69,7 @@ Transform:
   m_LocalScale: {x: 8, y: 10, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5624264087861647539}
+  - {fileID: 1590592271889619740}
   - {fileID: 8384243547074037605}
   - {fileID: 1909420067866207099}
   - {fileID: 555554299862299399}
@@ -214,9 +214,33 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: a2d5a33b-243d-4436-b65a-4faf1c004865
     m_ActionName: 'New action map/Swing[/Keyboard/x]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: eb00c2f2-91c5-4323-871d-8011640b1609
+    m_ActionName: 'PlayerActions/Crouch[/SwitchProControllerHID/buttonWest,/Keyboard/leftShift]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: faf6b7e0-7e32-4042-819b-13e783bcfb77
+    m_ActionName: 'PlayerActions/Restart[/SwitchProControllerHID/start]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 04a65570-dca1-4096-bd9c-338089b49a0a
+    m_ActionName: 'PlayerActions/ResetGame[/SwitchProControllerHID/select]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 2a24810e-c556-4127-827d-9476e1ef0445
+    m_ActionName: 'Transition/Confirm[/SwitchProControllerHID/buttonEast,/Keyboard/enter]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f2d7d9d6-cdda-4baa-bb2c-1a9e695eb1c5
+    m_ActionName: 'GameOver/Navigate[/SwitchProControllerHID/leftStick,/Keyboard/leftArrow,/Keyboard/rightArrow]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: c9299a4b-da29-4076-b495-ee24a34f8ee1
+    m_ActionName: 'GameOver/Confirm[/SwitchProControllerHID/buttonEast,/Keyboard/enter]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
-  m_DefaultActionMap: New action map
+  m_DefaultActionMap: 
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
 --- !u!65 &4846497814805484441
@@ -256,8 +280,31 @@ MonoBehaviour:
   jumpPower: 7
   climbSpeed: 5
   db: {fileID: 11400000, guid: fcf926e7cc7a18146a7ed4d5305dd745, type: 2}
+  footstepClips: []
+  jumpClip: {fileID: 0}
+  footstepVolume: 0.7
+  jumpVolume: 0.8
+  normalFootstepPitch: 1
+  crouchFootstepPitch: 0.65
+  savePointTag: SavePoint
+  restartEffectPrefab: {fileID: 0}
+  restartEffectOffset: {x: 0, y: 0, z: 0}
+  restartEffectLifetime: 3
+  savedPosition: {x: 0, y: 0, z: 0}
+  restartOnFall: 1
+  fallHeight: -20
+  useFallZone: 0
+  fallZoneTag: FallZone
+  bodyCollider: {fileID: 0}
+  crouchHeightRatio: 0.5
+  crouchMoveMultiplier: 0.5
+  standBlockingLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
   isGround: 0
   isTouchingLadder: 0
+  groundArea: {fileID: 0}
+  bossPassed: {fileID: 0}
 --- !u!114 &8826988385376910118
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -272,10 +319,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sc: {fileID: 0}
   ic: {fileID: 8761875096280711171}
+  catchAvailableImage: {fileID: 0}
   shootSpeed: 5
   getItems: 00000000000000000000000000000000
   shootPoint: {fileID: 4442876858440800814}
   weapon: {fileID: 1718850571392763395}
+  putClip: {fileID: 0}
+  throwClip: {fileID: 0}
+  ironBallAttackClip: {fileID: 0}
+  putVolume: 1
+  throwVolume: 1
+  ironBallAttackVolume: 1
+  fireShieldLayerName: EquippedWeapon
   isAttacking: 0
   ironBallAttackDuration: 0.4
   sp: {fileID: 0}
@@ -284,6 +339,7 @@ MonoBehaviour:
   swingEffectPrefab: {fileID: 0}
   swingEffectPrefab1: {fileID: 0}
   swingEffectPoint: {fileID: 0}
+  victoryResultUI: {fileID: 0}
 --- !u!95 &7331489903615813049
 Animator:
   serializedVersion: 7
@@ -320,6 +376,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerHp: 50
   hitEffectPrefab: {fileID: 0}
+  damageClip: {fileID: 0}
+  deathEffectPrefab: {fileID: 0}
+  deathEffectPoint: {fileID: 0}
+  gameOverObject: {fileID: 0}
+  destroyDelay: 0.7
+  effectLifeTime: 3
+  stopOnDeath: []
+  gameOverController: {fileID: 0}
 --- !u!114 &8086993216497744168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -336,6 +400,8 @@ MonoBehaviour:
   swingAngle: 60
   swingDrop: 0.1
   duration: 0.3
+  swingStartClip: {fileID: 0}
+  swingStartVolume: 1
 --- !u!1 &3718181156574336786
 GameObject:
   m_ObjectHideFlags: 0
@@ -403,6 +469,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   aroundItems: []
+  searchClip: {fileID: 0}
 --- !u!1 &4442876858440800814
 GameObject:
   m_ObjectHideFlags: 0
@@ -434,6 +501,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5148108458141098807}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6347236553169396695
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1590592271889619740}
+  m_Layer: 0
+  m_Name: ShakeCamera
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1590592271889619740
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6347236553169396695}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: -0, z: 0}
+  m_LocalScale: {x: 0.19999996, y: 0.1, z: 0.12499997}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5624264087861647539}
+  m_Father: {fileID: 5148108458141098807}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7175895507942405890
 GameObject:
   m_ObjectHideFlags: 0
@@ -462,12 +561,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7175895507942405890}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.02268737, y: 0, z: 0, w: 0.9997427}
-  m_LocalPosition: {x: -20.7475, y: -2.043637, z: 0.25806275}
-  m_LocalScale: {x: 0.19999996, y: 0.2, z: 0.19999996}
+  m_LocalRotation: {x: 0.016042393, y: -0.7069248, z: 0.016042393, w: 0.7069248}
+  m_LocalPosition: {x: 10.089714, y: -22.74637, z: -285.80017}
+  m_LocalScale: {x: 1.5999999, y: 1.9979422, z: 1.0020577}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5148108458141098807}
+  m_Father: {fileID: 1590592271889619740}
   m_LocalEulerAnglesHint: {x: -3.09, y: 180, z: 0}
 --- !u!20 &7751821766194751684
 Camera:
@@ -501,7 +600,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 1252.2
   field of view: 66.4
   orthographic: 0
   orthographic size: 5

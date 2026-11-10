@@ -538,7 +538,7 @@ Material:
     - _OutlineVectorScale: -3.3
     - _OutlineVectorUVMode: 0
     - _OutlineVertexR2Width: 0
-    - _OutlineWidth: 1.7
+    - _OutlineWidth: 0
     - _OutlineZBias: 1
     - _OutlineZClip: 1
     - _OutlineZTest: 2

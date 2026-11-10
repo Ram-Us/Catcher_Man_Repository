@@ -10,6 +10,12 @@ public class WeaponColliderController : MonoBehaviour
 
     [Min(0.01f)]
     [SerializeField] private float duration = 0.4f;
+    [SerializeField] private AudioClip swingStartClip;
+
+    [SerializeField, Range(0f, 5f)]
+    private float swingStartVolume = 1f;
+
+
 
     private bool isSwinging;
     public bool IsSwinging => isSwinging;
@@ -74,6 +80,10 @@ public class WeaponColliderController : MonoBehaviour
     private IEnumerator SwingRoutine()
     {
         isSwinging = true;
+        if (swingStartClip != null)
+        {
+            AudioSource.PlayClipAtPoint(swingStartClip, weaponPivot.position,swingStartVolume);
+        }
 
         startRotation = weaponPivot.localRotation;
         startPosition = weaponPivot.localPosition;
@@ -109,6 +119,7 @@ public class WeaponColliderController : MonoBehaviour
 
         isSwinging = false;
         swingCoroutine = null;
+
         yield return new WaitForSeconds(2.0f);
         
     }

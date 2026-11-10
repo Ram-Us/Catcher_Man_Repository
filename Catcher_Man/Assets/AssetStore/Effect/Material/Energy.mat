@@ -224,7 +224,7 @@ Material:
     - _BaseMapProgressCoord: 0
     - _BaseMapRandomRowCoord: 0
     - _BaseMapRandomRowSelectionEnabled: 0
-    - _BaseMapRotation: 0
+    - _BaseMapRotation: 0.04
     - _BaseMapRotationCoord: 0
     - _BaseMapRowCount: 1
     - _BaseMapSliceCount: 4

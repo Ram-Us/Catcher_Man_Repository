@@ -4,8 +4,18 @@ using System;
 public class BulletController : MonoBehaviour
 {
     [SerializeField] private GameObject enemy;
+    [SerializeField] private AudioClip hitClip;
+
     private void OnCollisionEnter(Collision collision)
     {
+        if (hitClip != null)
+        {
+            Vector3 hitPosition = collision.contactCount > 0
+                ? collision.GetContact(0).point
+                : transform.position;
+            AudioSource.PlayClipAtPoint(hitClip, hitPosition);
+        }
+
         if (collision.gameObject.CompareTag("Ground"))
         {
             Debug.Log("壁に激突");

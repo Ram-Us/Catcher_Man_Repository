@@ -14,6 +14,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
     }
     private EnemyState currentState;
     [SerializeField] private float idleDistance,battleDistance,jumpPower,leapSpeed,coolDownTimer;
+    [SerializeField] private AudioClip leapAttackClip;
     private float currentDistance,currentTimer;
     [SerializeField] private Transform player;
     [SerializeField] private int chaseSpeed;
@@ -37,6 +38,8 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
     // Update is called once per frame
     void Update()
     {
+        if (StopIfPlayerMissing()) return;
+
         currentDistance = GetDistancePlayer();
         switch (currentState)
         {
@@ -118,6 +121,8 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
 
     void FixedUpdate()
     {
+        if (StopIfPlayerMissing()) return;
+
         float direction = Math.Sign(player.position.z - transform.position.z);
         if(direction <= -1)
         {
@@ -168,6 +173,10 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
                     velocity.y = jumpPower;
                     velocity.z = direction * leapSpeed;
                     rb.linearVelocity = velocity;
+                    if (!ShooterType && leapAttackClip != null)
+                    {
+                        AudioSource.PlayClipAtPoint(leapAttackClip, transform.position);
+                    }
                     leapRequested = false;
                     /*Debug.Log(
                         $"Battle開始：request={leapRequested}, " +
@@ -185,10 +194,39 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
         }
     }
 
+    // UpdateだけでなくFixedUpdateからも確認する。
+    private bool StopIfPlayerMissing()
+    {
+        if (player != null) return false;
+
+        leapRequested = false;
+        isAttacking = false;
+        isColided = false;
+        if (anim != null && anim.runtimeAnimatorController != null &&
+            currentState != EnemyState.Idle)
+        {
+            anim.ResetTrigger("Chase");
+            anim.ResetTrigger("Leap");
+            anim.SetTrigger("Idle");
+        }
+        currentState = EnemyState.Idle;
+        currentSpeed = 0;
+        if (rb != null && !rb.isKinematic)
+        {
+            Vector3 velocity = rb.linearVelocity;
+            velocity.x = 0f;
+            velocity.z = 0f;
+            rb.linearVelocity = velocity;
+        }
+        return true;
+    }
+
     private float GetDistancePlayer()
     {
 
-        return Math.Abs(transform.position.z - player.position.z);
+        return player == null
+            ? float.PositiveInfinity
+            : Math.Abs(transform.position.z - player.position.z);
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -214,7 +252,8 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
 
     private void TryDamagePlayer(GameObject target)
     {
-        if (!isAttacking || isColided || !target.CompareTag("Player"))
+        if (player == null || target == null || enemyData == null ||
+            !isAttacking || isColided || !target.CompareTag("Player"))
         {
             return;
         }
@@ -244,6 +283,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
     {
         get
         {
+            if (player == null) return 0;
             return currentState switch
             {
                 EnemyState.Idle     => 0,
@@ -258,6 +298,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
     {
         get
         {
+            if (player == null) return 0f;
             return Mathf.Sign(
                 player.position.z - transform.position.z
             );
@@ -267,6 +308,7 @@ public class LeapEnemyController : MonoBehaviour,IEnemyProvider
     {
         get
         {
+            if (player == null) return Vector3.zero;
             Vector3 a = player.position - transform.position;
             a.x = 0f;
             return a.normalized;

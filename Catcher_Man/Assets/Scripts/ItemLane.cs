@@ -39,10 +39,17 @@ public class ItemLane : MonoBehaviour
         }
         yield return null;
     }
+
+    IEnumerator wait()
+    {
+        yield return new WaitForSeconds(5f);
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Item"))
         {
+            StartCoroutine(wait());
             other.gameObject.transform.position = lanePoint.transform.position;
         }
     }

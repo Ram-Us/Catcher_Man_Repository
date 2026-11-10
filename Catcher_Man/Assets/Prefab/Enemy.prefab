@@ -101,7 +101,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 339573802032263347}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 10
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -247,6 +247,8 @@ MonoBehaviour:
   hitEffectPrefab: {fileID: 4748681987041982144, guid: aebfb8f69b249bb48b3466d23b0e3c50, type: 3}
   player: {fileID: 3170357763474722860, guid: 09f9ceb03ec0d5445a63797edeca1ecb, type: 3}
   enemy: {fileID: 339573802032263347}
+  hitClip: {fileID: 8300000, guid: 0d93e2bfa6c241640814944ed255581f, type: 3}
+  effectLifetime: 3
 --- !u!1 &6789699088166604714
 GameObject:
   m_ObjectHideFlags: 0
